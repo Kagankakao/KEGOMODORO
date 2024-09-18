@@ -9,7 +9,6 @@ KEGOMODORO is a Pomodoro timer application designed to help you manage your time
 ## Features
 
 - **Pomodoro Mode**: Track work and break periods using the Pomodoro Technique.
-![image](https://github.com/user-attachments/assets/e474ad9f-8fac-4979-9684-9ec73a147a00)
 - **Stopwatch Mode**: Use the timer as a simple stopwatch.
 - **Pause and Resume**: Pause and resume your timer easily.
 - **Floating Timer**: Keep a floating window timer on top of other applications.
