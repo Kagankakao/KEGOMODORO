@@ -118,7 +118,3 @@ If you'd like to contribute to this project, please fork the repository, create 
 ### License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-Feel free to update the instructions based on your project's specific needs or any additional features you may have.
