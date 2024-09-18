@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/4994a689-1c92-4bfa-a903-b9dabde00006)# KEGOMODORO - Pomodoro Timer Application
+# KEGOMODORO - Pomodoro Timer Application
 
 ## Overview
 
@@ -8,16 +8,20 @@ KEGOMODORO is a Pomodoro timer application designed to help you manage your time
 
 ## Features
 
-- **Pomodoro Mode**: Track work and break periods using the Pomodoro Technique.
-- **Stopwatch Mode**: Use the timer as a simple stopwatch.
-- **Pause and Resume**: Pause and resume your timer easily.
-- **Floating Timer**: Keep a floating window timer on top of other applications.
+- **Pomodoro Mode**: Track work and break periods using the **Pomodoro Technique**.
+- **Stopwatch Mode**: Use the **timer** as a simple stopwatch.
+- **Pause and Resume**: Pause and resume your timer **easily**.
+- **Floating Timer**: Keep a floating window timer on top of **other applications**.
 ![image](https://github.com/user-attachments/assets/96e1a41d-dc5d-40f3-a429-2cf6b6a2a41d)
-- **Save Data**: Save your time data and notes to a CSV file.
-![image](https://github.com/user-attachments/assets/0b669bc0-d472-4dcd-a5e7-9979df36786a)
-- **Pixela Integration**: Upload time data to Pixela for visualization and tracking.
-![image](https://github.com/user-attachments/assets/6eb448b2-4fb5-4b39-9b36-377fc235a731)
+- **Take Notes**: Take notes and save your work **automatically**.
 
+![image](https://github.com/user-attachments/assets/0d16e654-c04e-4a1a-87b2-845b87be7f40)
+- **Example**: **Automatically** saved notes:
+
+![image](https://github.com/user-attachments/assets/0b669bc0-d472-4dcd-a5e7-9979df36786a)
+- **Pixela Integration**: Uploads time data to Pixela for **visualization** and **tracking**.
+![image](https://github.com/user-attachments/assets/6eb448b2-4fb5-4b39-9b36-377fc235a731)
+**Example** of mine: https://pixe.la/v1/users/kegan/graphs/graph1.html
 
 
 ## Getting Started
