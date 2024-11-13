@@ -125,8 +125,6 @@ def connect_to_pixela():
         print("Trying to connect to Pixela again...")
         time.sleep(0.5)
         connect_to_pixela()
-
-connect_to_pixela()
 # ----------------------------MODS---------------------------- #
 def pomodoro_mode():
     global pomodoro_mode_activate, crono_mode_activate
@@ -647,4 +645,3 @@ with open("floating_window_checker.txt", "r") as file:
 
 # 20
 root.mainloop()
-
