@@ -16,6 +16,7 @@ from keyboard import is_pressed
 from PIL import Image, ImageTk
 from pathlib import Path
 # ---------------------------- CONSTANTS AND SOME VARIABLES ------------------------------- #
+BLACK = "#000000"
 PINK = "#e2979c"
 RED = "#e7305b"
 GREEN = "#77ed95"
@@ -40,10 +41,10 @@ TEXTS = f"{DEPENDENCIES}/texts"
 
 SAVE_FILE_NAME = f"{TEXTS}/YOUR_CSV_FILE_NAME.txt" # ! Change this to your desired file name
 BREAK_SOUND_PATH = f"{AUDIOS}/Ding.mp3"
-APP_ICON_PATH = f"{IMAGES}/tomato_window.png" # ! THIS IS THE ICON STUFF SO CHANGE THIS
-FLOATING_IMAGE_PATH = f"{IMAGES}/tomato.gif"
+APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! THIS IS THE ICON STUFF SO CHANGE THIS
+FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.gif"
 LOGO_IMAGE_PATH = f"{IMAGES}/logo.png"
-MAIN_IMAGE_PATH = f"{IMAGES}/tomato.png"
+MAIN_IMAGE_PATH = f"{IMAGES}/behelit_main.png"
 FLOATING_WINDOW_CHECKER_PATH = f"{TEXTS}/floating_window_checker.txt"
 TIME_CSV_PATH = f"{TEXTS}/time.csv"
 # Load to audio file
@@ -116,7 +117,6 @@ def connect_to_pixela():
     # creates user
     response = requests.post(url=PIXELA_ENDPOINT, json=params)
     print(response.text)
-    # print(response.text)
 
     graphic_endpoint = f"{PIXELA_ENDPOINT}{USERNAME}/graphs"
     graphic_params = {
@@ -431,18 +431,16 @@ def pause_timer():
                     timer_label.config(text="Work", fg=RED)
                 print("hi")
 
-
     elif crono_mode_activate:
         if not condition_checker:
             root.after_cancel(count_upper)
-            timer_label.config(text=f"Paused", fg=DEEP_BLUE)
+            timer_label.config(text=f"Paused", fg=DEEP_BLUE) 
             pause_button.config(text=f"Resume")
             second_int = second
             minute_int = minute
             paused = True
             resume += 1
             if show_hours:
-
                 canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}")
                 floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold"))
                 floating_timer_label.place(x=HOURS_X, y=HOURS_Y)
@@ -474,10 +472,10 @@ def save_data():
             file.write(f"{hours},{minute},{second}\n")
 
         if show_hours:
-            saved_note = askstring('Save your note', 'Write your note:')
-            if saved_note == "pass" or saved_note == "":
+            saved_note = askstring('', 'Write your note:')
+            if saved_note == "pass" or saved_note == "" or saved_note=="None":
                 return
-            if saved_note != "":
+            else: 
                 showinfo("Saved!", 'Your note: {}'.format(saved_note))
             saved_data["date"].append(dt.datetime.now().strftime("%Y-%m-%d"))
             saved_data["time"].append(f"{hours:02d}:{minute:02d}:{second:02d}")
@@ -486,9 +484,9 @@ def save_data():
         else:
             # add_note = tkinter.messagebox.Messagebox("Add note:", f"Time: {minute:02d}:{second:02}")
             saved_note = askstring('Save your note', 'Write your note:')
-            if saved_note == "pass" or saved_note == "":
+            if saved_note == "pass" or saved_note == "" or saved_note=="None":
                 return
-            if saved_note != "":
+            else: 
                 showinfo("Saved!", 'Your note: {}'.format(saved_note))
             saved_data["date"].append(dt.datetime.now().strftime("%Y-%m-%d"))
             saved_data["time"].append(f"{minute:02d}:{second:02d}")
