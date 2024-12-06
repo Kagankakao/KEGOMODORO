@@ -21,11 +21,11 @@ from pathlib import Path
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 BLACK = "#000000"
 PINK = "#e2979c"
-RED = "#070A52"
-GREEN = "#EB5B00"
-YELLOW = "#8B0000"
+RED = "#e7305b"
+GREEN = "#77ed95"
+YELLOW = "#f7f5dd"
 ORANGE = "#fcba03"
-DEEP_BLUE = "#321E1E"
+DEEP_BLUE = "#281c3c"
 DEEP_RED = "#cc2b33"
 FONT_NAME = "Courier"
 TOMATO_COLOR = "#f26849"
@@ -45,9 +45,9 @@ TEXTS = f"{DEPENDENCIES}/texts"
 SAVE_FILE_NAME = f"{TEXTS}/YOUR_CSV_FILE_NAME.txt" # ! Change this to your desired file name
 BREAK_SOUND_PATH = f"{AUDIOS}/ding.mp3"
 APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! THIS IS THE ICON STUFF SO CHANGE THIS
-FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.png"
-LOGO_IMAGE_PATH = f"{IMAGES}/logo2.png"
-MAIN_IMAGE_PATH = f"{IMAGES}/space_tomato2.png"
+FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.gif"
+LOGO_IMAGE_PATH = f"{IMAGES}/logo.png"
+MAIN_IMAGE_PATH = f"{IMAGES}/tomato.png"
 FLOATING_WINDOW_CHECKER_PATH = f"{TEXTS}/floating_window_checker.txt"
 TIME_CSV_PATH = f"{TEXTS}/time.csv"
 # Load to audio file
@@ -238,7 +238,7 @@ def reset():
 
     else:
         print("Error: No mode selected")
-    timer_label.config(text="TIMER", fg=GREEN)
+    timer_label.config(text="Timer", fg=GREEN)
     check_mark.config(text="")
     reps = 1
     start_timer_checker = 0
@@ -542,7 +542,6 @@ def center_window(window):
 root = Tk()
 root.title("KEGOMODORO")
 root.config(padx=100, pady=50, bg=YELLOW)
-root.resizable(False, False)
 ico = Image.open(APP_ICON_PATH) 
 photo = ImageTk.PhotoImage(ico)
 root.wm_iconphoto(False, photo)
