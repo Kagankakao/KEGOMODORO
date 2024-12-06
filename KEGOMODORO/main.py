@@ -22,9 +22,10 @@ GREEN = "#77ed95"
 YELLOW = "#f7f5dd"
 ORANGE = "#fcba03"
 DEEP_BLUE = "#281c3c"
-DEEP_RED = "#249813"
+DEEP_RED = "#cc2b33"
 FONT_NAME = "Courier"
 TOMATO_COLOR = "#f26849"
+GRAY_COLOR = "#696969"
 WHITE = "#feffff"
 
 PIXELA_ENDPOINT = "https://pixe.la/v1/users"
@@ -72,10 +73,14 @@ hours = 0
 count_downer = 0
 count_upper = 0
 note_writer_first_gap = 0
-HOURS_X=7
-HOURS_Y=110
-MINUTE_X=38
-MINUTE_Y=110
+MAIN_MINUTE_FONT_SIZE = 30
+MAIN_HOUR_FONT_SIZE = 30
+FLOATING_MINUTE_FONT_SIZE = 26
+FLOATING_HOUR_FONT_SIZE = 23
+HOURS_X=125
+HOURS_Y=170
+MINUTE_X=160
+MINUTE_Y=168
 
 show_hours = False
 pomodoro_mode_activate = False
@@ -87,7 +92,7 @@ start_long_break = False
 open_floating_window = False
 
 #TODO: LONG_BREAK 05:00 TEXTİNİ DİNAMİK YAP
-
+#TODO: WHEN YOU RESET THE TIMER AND YOU'LL SEE 00:00 THAN YOU SWITCH TO POMODORO AND SWTICH AGAIN THE STOPWATCH THAN YOU'LL SEE 02:00(OLD TIME FROM THE SAVE), FIX THIS SHIT MAN
 # ------------------------------ SOME BOOT-UPS --------------------------------- #
 
 # Creating time.csv
@@ -169,16 +174,19 @@ def crono_mode():
     second = df['second'].iloc[-1]
     minute = df['minute'].iloc[-1]
     hours = df['hours'].iloc[-1]
-    if show_hours != "0":
+    print(df['hours'].iloc[-1])
+    print(type(int(df['hours'].iloc[-1])))
+    if show_hours != 0:
         show_hours = True
+    print(show_hours)
 
     if not show_hours:
         canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
-        floating_timer_label.congig(text=f"{minute:02d}:{second:02d}")
+        floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold")) #! RELATIONAL WITH FLOATING TIMER BUT WHERE IDK
         floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
     if show_hours:
-        canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, 30, "bold"))
-        floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, 28, "bold"))
+        canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, MAIN_HOUR_FONT_SIZE, "bold")) #! RELATIONAL WITH MAIN SCREEN'S TIMER
+        floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold")) #! RELATIONAL WITH FLOATING TIMER
         floating_timer_label.place(x=HOURS_X, y=HOURS_Y)
 def floating_window(**kwargs):
     global open_floating_window, checked_state
@@ -239,9 +247,9 @@ def reset():
     show_hours = False
     # pause_checker = 0
     pause_button.config(text=f"Pause")
-    canvas.itemconfig(timer, text="00:00", font=(FONT_NAME, 30, "bold"))
-    floating_timer_label.config(text="00:00", font=(FONT_NAME, 28, "bold"))
-    floating_timer_label.place(x=38, y=110)
+    canvas.itemconfig(timer, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"))
+    floating_timer_label.config(text="00:00", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold"))
+    floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
     
 
 # ---------------------------- CRONOMETER MECHANISM ------------------------------- #
@@ -250,7 +258,7 @@ def crono():
     timer_label.config(text="WORK", fg=RED)
     if not show_hours:
         canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
-        floating_timer_label.config(text=f"{minute:02d}:{second:02d}")
+        floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold")) #? IS THIS EVEN WORKING??
         floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
     # Update the timer display every second
     second += 1
@@ -262,10 +270,10 @@ def crono():
         hours += 1
         show_hours = True
     if show_hours:
-        canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, 30, "bold"))
-        floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, 28, "bold"))
+        canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, MAIN_HOUR_FONT_SIZE, "bold"))
+        floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold"))
         floating_timer_label.place(x=HOURS_X, y=HOURS_Y)
-    # you can change the speed of countup here
+    # You can change the speed of countup here
     count_upper = root.after(1000, crono)
 
 
@@ -397,7 +405,7 @@ def pause_timer():
             # if minute == 0:
             #     minute = "00"
             canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
-            floating_timer_label.config(text=f"{minute:02d}:{second:02d}")
+            floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold"))
             floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
 
             second = second_int
@@ -433,24 +441,14 @@ def pause_timer():
             minute_int = minute
             paused = True
             resume += 1
-            # for i in range(1, 10):
-            #     if second == i:
-            #         second = f"0{second}"
-            # for i in range(1, 10):
-            #     if minute == i:
-            #         minute = f"0{minute}"
-            # if second == 0:
-            #     second = "00"
-            # if minute == 0:
-            #     minute = "00"
             if show_hours:
 
                 canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}")
-                floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}")
+                floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold"))
                 floating_timer_label.place(x=HOURS_X, y=HOURS_Y)
             elif not show_hours:
                 canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
-                floating_timer_label.config(text=f"{minute:02d}:{second:02d}")
+                floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold"))
                 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
             else:
                 print("Error: There's a problem with the show_hours")
@@ -560,7 +558,7 @@ class DraggableWindow(Toplevel):
         
         # Load the image and keep a reference to it
         self.image = ImageTk.PhotoImage(Image.open(FLOATING_IMAGE_PATH))
-        label = Label(self, image=self.image, bg='white', highlightthickness=0)
+        label = Label(self, image=self.image, bg='white', highlightthickness=0) #! Adjust the frame color of image
         self.overrideredirect(True)
         self.geometry("+250+250")
         self.lift()
@@ -599,7 +597,7 @@ window.overrideredirect(True)
 window.resizable(False, False)
 window.geometry("+1150+440")
 
-floating_timer_label = Label(window, text="00:00", font=(FONT_NAME, 28, "bold"), foreground=WHITE, background=TOMATO_COLOR)
+floating_timer_label = Label(window, text="00:00", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold"), foreground=WHITE, bg=DEEP_RED)
 floating_timer_label.pack()
 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
 
@@ -614,7 +612,7 @@ logo.place(x=-300, y=230)
 canvas = Canvas(width=200, height=240, bg=YELLOW, highlightthickness=0)
 tomato_img = PhotoImage(file=MAIN_IMAGE_PATH)
 canvas.create_image(100, 112, image=tomato_img)
-timer = canvas.create_text(103, 130, text="00:00", font=(FONT_NAME, 30, "bold"), fill="white")
+timer = canvas.create_text(103, 130, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"), fill="white")
 canvas.grid(column=1, row=1)
 
 # labels
