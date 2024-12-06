@@ -1,3 +1,4 @@
+import os
 import csv
 import tkinter.messagebox
 import math
@@ -16,6 +17,8 @@ from keyboard import is_pressed
 from PIL import Image, ImageTk
 from pathlib import Path
 # ---------------------------- CONSTANTS AND SOME VARIABLES ------------------------------- #
+# Change working directory to the script's location
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 BLACK = "#000000"
 PINK = "#e2979c"
 RED = "#e7305b"
@@ -40,7 +43,7 @@ AUDIOS = f"{DEPENDENCIES}/audios"
 TEXTS = f"{DEPENDENCIES}/texts"
 
 SAVE_FILE_NAME = f"{TEXTS}/YOUR_CSV_FILE_NAME.txt" # ! Change this to your desired file name
-BREAK_SOUND_PATH = f"{AUDIOS}/Ding.mp3"
+BREAK_SOUND_PATH = f"{AUDIOS}/ding.mp3"
 APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! THIS IS THE ICON STUFF SO CHANGE THIS
 FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.gif"
 LOGO_IMAGE_PATH = f"{IMAGES}/logo.png"
@@ -542,7 +545,7 @@ root.config(padx=100, pady=50, bg=YELLOW)
 ico = Image.open(APP_ICON_PATH) 
 photo = ImageTk.PhotoImage(ico)
 root.wm_iconphoto(False, photo)
-root.geometry("+700+300") 
+root.geometry("+700+300") #! ADJUSTS THE STARTING LOCATION OF WINDOW
 # ---------------------------- FLOATING WINDOW SETUP ------------------------------- #
 class DraggableWindow(Toplevel):
     def __init__(self):
@@ -609,7 +612,7 @@ logo.place(x=-300, y=230)
 # Tomato
 canvas = Canvas(width=200, height=240, bg=YELLOW, highlightthickness=0)
 tomato_img = PhotoImage(file=MAIN_IMAGE_PATH)
-canvas.create_image(100, 112, image=tomato_img)
+canvas.create_image(100, 112, image=tomato_img) #? IT'S CENTER THE IMAGE
 timer = canvas.create_text(103, 130, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"), fill="white")
 canvas.grid(column=1, row=1)
 
