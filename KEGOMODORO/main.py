@@ -31,18 +31,23 @@ FONT_NAME = "Courier"
 TOMATO_COLOR = "#f26849"
 GRAY_COLOR = "#696969"
 WHITE = "#feffff"
+BUTTON_BACKGROUND_COLOR = BLACK
+BUTTON_FOREGROUND_COLOR = WHITE
+RADIO_BACKGROUND_COLOR = "#8B0000"
+RADIO_FOREGROUND_COLOR = BLACK
 
-PIXELA_ENDPOINT = "https://pixe.la/v1/users"
-USERNAME = "YOUR_USERNAME"
-TOKEN = "YOUR_TOKEN"
-GRAPH_ID = "YOUR_GRAPH_ID"
+
+PIXELA_ENDPOINT = "https://pixe.la/v1/users" #! FILL HERE
+USERNAME = "kegan" #! FILL HERE
+TOKEN = "afhus8hj2phfb29nn821r" #! FILL HERE
+GRAPH_ID = "graph1" #! FILL HERE
 
 DEPENDENCIES = Path("dependencies/")
 IMAGES = f"{DEPENDENCIES}/images"
 AUDIOS = f"{DEPENDENCIES}/audios"
 TEXTS = f"{DEPENDENCIES}/texts"
 
-SAVE_FILE_NAME = f"{TEXTS}/YOUR_CSV_FILE_NAME.txt" # ! Change this to your desired file name
+SAVE_FILE_NAME = f"{TEXTS}/KAÆ[Æß#.txt" # ! Change this to your desired file name
 BREAK_SOUND_PATH = f"{AUDIOS}/ding.mp3"
 APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! THIS IS THE ICON STUFF SO CHANGE THIS
 FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.png"
@@ -53,7 +58,9 @@ TIME_CSV_PATH = f"{TEXTS}/time.csv"
 # Load to audio file
 pygame.mixer.init()
 BREAK_SOUND = pygame.mixer.Sound(BREAK_SOUND_PATH)
-#TODO CHANGE THE SAVE NOTE ICON
+# Audio volume
+BREAK_SOUND.set_volume(0.5)
+#TODO: CHANGE THE SAVE NOTE ICON
 # ----------------------------- TIMER VARIABLES ------------------------------- #
 now = str(datetime.datetime.now())
 DATE = now.split(" ")[0].replace("-", "")
@@ -94,9 +101,8 @@ paused = False
 start_short_break= False
 start_long_break = False
 open_floating_window = False
-
 #TODO: LONG_BREAK 05:00 TEXTİNİ DİNAMİK YAP
-#TODO: WHEN YOU RESET THE TIMER AND YOU'LL SEE 00:00 THAN YOU SWITCH TO POMODORO AND SWTICH AGAIN THE STOPWATCH THAN YOU'LL SEE 02:00(OLD TIME FROM THE SAVE), FIX THIS SHIT MAN
+#TODO: CHANE THE COLORS NAME, THEY ARE WRONG
 # ------------------------------ SOME BOOT-UPS --------------------------------- #
 
 # Creating time.csv
@@ -158,8 +164,10 @@ def connect_to_pixela():
         connect_to_pixela()
 # ----------------------------MODS---------------------------- #
 def pomodoro_mode():
-    global pomodoro_mode_activate, crono_mode_activate
-
+    global pomodoro_mode_activate, crono_mode_activate, hours, minute, second
+    if crono_mode_activate:
+        with open(TIME_CSV_PATH, mode='a') as file:
+            file.write(f"{hours},{minute},{second}\n")
     reset()
     crono_mode_activate = False
     pomodoro_mode_activate = True
@@ -172,16 +180,12 @@ def crono_mode():
     pomodoro_mode_activate = False
 
     # get's the time in time file
-    print("in crono_mode")
     df = pd.read_csv(TIME_CSV_PATH)
     second = df['second'].iloc[-1]
     minute = df['minute'].iloc[-1]
     hours = df['hours'].iloc[-1]
-    print(df['hours'].iloc[-1])
-    print(type(int(df['hours'].iloc[-1])))
-    if show_hours != 0:
+    if int(hours) != 0:
         show_hours = True
-    print(show_hours)
 
     if not show_hours:
         canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
@@ -193,21 +197,15 @@ def crono_mode():
         floating_timer_label.place(x=HOURS_X, y=HOURS_Y)
 def floating_window(**kwargs):
     global open_floating_window, checked_state
-    print(open_floating_window)
     if open_floating_window == "True" or open_floating_window == "False":
-        print(open_floating_window)
-        print(type(open_floating_window))
         open_floating_window = open_floating_window.lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
     open_floating_window = not open_floating_window
-    print(open_floating_window)
     try:
         kwargs["check"]
     except Exception as e:
         print(f"Error: {e}")
     else:
         open_floating_window = kwargs.get("check") 
-        print(open_floating_window)
-        print(type(open_floating_window))
     if open_floating_window == "True" or open_floating_window == True:
         window.deiconify()
         checked_state.set(1)
@@ -223,7 +221,7 @@ def floating_window(**kwargs):
 # ----------------------------TIMER RESET ------------------------------- #
 def reset():
     global reps, count_downer, count_upper, start_timer_checker, minute, second, pause_checker, \
-        condition_checker, pomodoro_mode_activate, crono_mode_activate, hours, show_hours
+        condition_checker, pomodoro_mode_activate, crono_mode_activate, hours, show_hours, resume
     if pomodoro_mode_activate:
         try:
             root.after_cancel(count_downer)
@@ -284,7 +282,6 @@ def crono():
 def start_timer():
     global start_timer_checker, pause_checker, condition_checker, pomodoro_mode_activate, crono_mode_activate, start_short_break, start_long_break
     condition_checker = False
-    print("a")
     if pomodoro_mode_activate:
         start_timer_checker += 1
         pause_checker = 1
@@ -294,7 +291,6 @@ def start_timer():
             work_sec = WORK_MIN * 60
             short_break_sec = SHORT_BREAK_MIN * 60
             long_break_sec = LONG_BREAK_MIN * 60
-            print(reps)
             if reps % 8 == 0:
                 BREAK_SOUND.play()
                 variable = condition_checker
@@ -303,8 +299,6 @@ def start_timer():
                 pause_timer()
                 condition_checker = variable
                 timer_label.config(text="Break", fg=PINK)
-                # if condition_checker:
-                #     count_down(long_break_sec)
                 canvas.itemconfig(timer, text=f"20:00")
                 floating_timer_label.config(text="20:00")
                 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
@@ -334,15 +328,12 @@ def start_timer():
                 condition_checker = False
                 start_short_break = True
                 pause_timer()
-                # if condition_checker:
-                #     count_down(short_break_sec)
                 condition_checker = variable
                 timer_label.config(text="Break", fg=PINK)
                 canvas.itemconfig(timer, text=f"05:00")
                 floating_timer_label.config(text="05:00")
                 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
                 reps += 1
-                #TODO: reduce the volume of the break sound
     elif crono_mode_activate:
         start_timer_checker += 1
         pause_checker = 1
@@ -359,17 +350,6 @@ def count_down(count):
     minute = math.floor(count / 60)
     second_int = count % 60
     minute_int = math.floor(count / 60)
-
-    # for i in range(1, 10):
-    #     if second == i:
-    #         second = f"0{second}"
-    # for i in range(1, 10):
-    #     if minute == i:
-    #         minute = f"0{minute}"
-    # if second == 0:
-    #     second = "00"
-    # if minute == 0:
-    #     minute = "00"
     canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
     floating_timer_label.config(text=f"{minute:02d}:{second:02d}")
     floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
@@ -384,29 +364,18 @@ def count_down(count):
         global start_timer_checker
         start_timer_checker = 0
         start_timer()
-
+#TODO: SOMETIMES, WHEN YOU PAUSE THEN START TIMER SKIPS THE ANOTHER SECOND, FIX IT
 
 def pause_timer():
     # if pause_checker == 1:
-    global pomodoro_mode_activate, crono_mode_activate, resume, count_downer, count_upper, minute, second, paused,start_short_break, start_long_break,short_break_sec, long_break_sec
+    global pomodoro_mode_activate, crono_mode_activate, resume, count_downer, count_upper, minute, second, paused,start_short_break, start_long_break,short_break_sec, long_break_sec, condition_checker
     if pomodoro_mode_activate:
         if not condition_checker:
-            print("hiiiiiiiiii")
             root.after_cancel(count_downer)
             second_int = second
             minute_int = minute
             paused = True
             resume += 1
-            # for i in range(1, 10):
-            #     if second == i:
-            #         second = f"0{second}"
-            # for i in range(1, 10):
-            #     if minute == i:
-            #         minute = f"0{minute}"
-            # if second == 0:
-            #     second = "00"
-            # if minute == 0:
-            #     minute = "00"
             canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
             floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold"))
             floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
@@ -432,7 +401,6 @@ def pause_timer():
                 else:
                     count_down(minute * 60 + second)
                     timer_label.config(text="Work", fg=RED)
-                print("hi")
 
     elif crono_mode_activate:
         if not condition_checker:
@@ -457,7 +425,6 @@ def pause_timer():
             if resume == 2:
                 paused = False
                 resume = 0
-                print("hi")
                 timer_label.config(text="WORK", fg=RED)
                 pause_button.config(text=f"Pause")
                 count_upper = root.after(500, crono)
@@ -483,7 +450,6 @@ def save_data():
             saved_data["date"].append(dt.datetime.now().strftime("%Y-%m-%d"))
             saved_data["time"].append(f"{hours:02d}:{minute:02d}:{second:02d}")
             saved_data["notes"].append(saved_note)
-            print("lalaalalal")
         else:
             # add_note = tkinter.messagebox.Messagebox("Add note:", f"Time: {minute:02d}:{second:02}")
             saved_note = askstring('Save your note', 'Write your note:')
@@ -496,10 +462,8 @@ def save_data():
             saved_data["notes"].append(saved_note)
         # when pressing the 'Save' button, it saves the data to a CSV file and for not to do overwrite the file:
         try:
-            print(saved_data)
             if note_writer_first_gap == 0:
                 note_writer_first = ""
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
             else:
                 note_writer_first = "\n"
             note_writer_first_gap = None
@@ -511,10 +475,7 @@ def save_data():
                     file.write(
                         f"{note_writer_first}{dt.datetime.now().strftime("%m/%d/%Y")}\n{hours:02d}:{minute:02d}:{second:02d} {saved_note}\n")
         except e:
-            print(f"!!!!!!!!!!!! {e}")
-        # [f"\n{dt.datetime.now().strftime("%m/%d/%Y")}" f"\n{hours:02d}:{minute:02d}:{second:02d} ", saved_note])
-
-        # It's actually unpause the timer
+            print(e)
     else:
         tkinter.messagebox.showerror("Error", "You need to be in stopwatch mode to use save button.")
     # save this data to a pixela website
@@ -538,6 +499,10 @@ def center_window(window):
     y = (screen_height - height) // 2
     window.geometry(f"{width}x{height}+{x}+{y}")
 
+def on_closing():
+    with open(TIME_CSV_PATH, mode='a') as file:
+        file.write(f"{hours},{minute},{second}\n")
+        root.destroy()
 # ---------------------------- UI SETUP ------------------------------- #
 root = Tk()
 root.title("KEGOMODORO")
@@ -630,32 +595,46 @@ check_mark.grid(column=1, row=3)
 check_mark.place(x=120, y=300)
 
 # buttons
-start_button = Button(text="Start", command=start_timer, highlightthickness=0)
+start_button = Button(text="Start", command=start_timer, highlightthickness=0, 
+                      background=BUTTON_BACKGROUND_COLOR, foreground=BUTTON_FOREGROUND_COLOR,
+                      activebackground=BUTTON_BACKGROUND_COLOR, activeforeground=BUTTON_FOREGROUND_COLOR)
 start_button.grid(column=0, row=2)
 start_button.place(x=-30, y=291)
 
-pause_button = Button(text="Pause", command=pause_timer, highlightthickness=0)
+pause_button = Button(text="Pause", command=pause_timer, highlightthickness=0, 
+                      background=BUTTON_BACKGROUND_COLOR, foreground=BUTTON_FOREGROUND_COLOR,
+                      activebackground=BUTTON_BACKGROUND_COLOR, activeforeground=BUTTON_FOREGROUND_COLOR)
 pause_button.grid(column=0, row=2)
 pause_button.place(x=4, y=291)
 
-reset_button = Button(text="Reset", highlightthickness=0, command=reset)
+reset_button = Button(text="Reset", highlightthickness=0, command=reset, 
+                      background=BUTTON_BACKGROUND_COLOR, foreground=BUTTON_FOREGROUND_COLOR,
+                      activebackground=BUTTON_BACKGROUND_COLOR, activeforeground=BUTTON_FOREGROUND_COLOR)
 reset_button.grid(column=2, row=2)
 reset_button.place(x=175, y=291)
 
-save_button = Button(text="Save", highlightthickness=0, command=save_data)
+save_button = Button(text="Save", highlightthickness=0, command=save_data, 
+                      background=BUTTON_BACKGROUND_COLOR, foreground=BUTTON_FOREGROUND_COLOR,
+                      activebackground=BUTTON_BACKGROUND_COLOR, activeforeground=BUTTON_FOREGROUND_COLOR)
 save_button.grid(column=2, row=2)
 save_button.place(x=213, y=291)
 
 checked_state = IntVar()
-checkbutton = Checkbutton(text="SmallWindow", variable=checked_state, command=floating_window, background=YELLOW)
+checkbutton = Checkbutton(text="SmallWindow", variable=checked_state, command=floating_window, 
+                           background=RADIO_BACKGROUND_COLOR, foreground=RADIO_FOREGROUND_COLOR,
+                           activebackground=RADIO_BACKGROUND_COLOR, activeforeground=RADIO_FOREGROUND_COLOR)
 checkbutton.place(x=200, y=20)
 
 # radio buttons
 radio_state = IntVar()
-radiobutton1 = Radiobutton(text="Pomodoro", value=1, variable=radio_state, command=pomodoro_mode, bg=YELLOW,
-                           highlightthickness=0)
-radiobutton2 = Radiobutton(text="Stopwatch", value=2, variable=radio_state, command=crono_mode, bg=YELLOW,
-                           highlightthickness=0)
+radiobutton1 = Radiobutton(text="Pomodoro", value=1, variable=radio_state, command=pomodoro_mode,
+                           highlightthickness=0, 
+                           background=RADIO_BACKGROUND_COLOR, foreground=RADIO_FOREGROUND_COLOR,
+                           activebackground=RADIO_BACKGROUND_COLOR, activeforeground=RADIO_FOREGROUND_COLOR)
+radiobutton2 = Radiobutton(text="Stopwatch", value=2, variable=radio_state, command=crono_mode,
+                           highlightthickness=0, 
+                           background=RADIO_BACKGROUND_COLOR, foreground=RADIO_FOREGROUND_COLOR,
+                           activebackground=RADIO_BACKGROUND_COLOR, activeforeground=RADIO_FOREGROUND_COLOR)
 radiobutton1.place(x=200, y=-20)
 radiobutton2.place(x=200, y=-0)
 
@@ -664,10 +643,11 @@ window.withdraw()
 try:
     with open(FLOATING_WINDOW_CHECKER_PATH, "r") as file:
         floating_window_boolean = file.readline()
-        print(floating_window_boolean)
         floating_window(check = floating_window_boolean)
 except FileNotFoundError as e:
     with open(FLOATING_WINDOW_CHECKER_PATH, "w") as file:
         file.write("")
+
+root.protocol("WM_DELETE_WINDOW", on_closing)
 
 root.mainloop()
