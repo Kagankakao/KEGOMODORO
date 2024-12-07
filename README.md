@@ -7,6 +7,8 @@ KEGOMODORO is a Pomodoro timer application designed to help you manage your time
 **LIGHT AND DARK THEME!**
 ![image](https://github.com/user-attachments/assets/03f6b559-2e03-44c9-9f9e-eaf5a2991da7)
 
+### **Behelit Feature (from *Berserk*)**
+- For fans of *Berserk*, a Behelit feature has been added to the cronometer. When activated, it serves as a special timer with a visual reference to the Behelit, adding a touch of *Berserk* magic to your experience!
 
 ## Features
 
