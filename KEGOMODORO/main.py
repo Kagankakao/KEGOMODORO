@@ -21,11 +21,11 @@ from pathlib import Path
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 BLACK = "#000000"
 PINK = "#e2979c"
-RED = "#070A52"
+RED = "#000000"
 GREEN = "#EB5B00"
 YELLOW = "#8B0000"
 ORANGE = "#fcba03"
-DEEP_BLUE = "#321E1E"
+DEEP_BLUE = "#000000"
 DEEP_RED = "#cc2b33"
 FONT_NAME = "Courier"
 TOMATO_COLOR = "#f26849"
@@ -35,11 +35,17 @@ BUTTON_BACKGROUND_COLOR = BLACK
 BUTTON_FOREGROUND_COLOR = WHITE
 RADIO_BACKGROUND_COLOR = "#8B0000"
 RADIO_FOREGROUND_COLOR = BLACK
+SWITCH_BUTTON_DARK_BG_COLOR = BLACK
+SWITCH_BUTTON_DARK_FG_COLOR = WHITE
+SWITCH_BUTTON_LIGHT_BG_COLOR = WHITE
+SWITCH_BUTTON_LIGHT_FG_COLOR = BLACK
 
-
+#TODO: WHEN RESTING THE TIMER SAVE IT!
+#TODO: UPDATE THE SAVE YOUR NOTE SECTION
+#TODO: CHANGE THE THEMES
 PIXELA_ENDPOINT = "https://pixe.la/v1/users" #! FILL HERE
-USERNAME = "kegan" #! FILL HERE
-TOKEN = "afhus8hj2phfb29nn821r" #! FILL HERE
+USERNAME = "kegan"
+TOKEN = "afhus8hj2phfb29nn821r"
 GRAPH_ID = "graph1" #! FILL HERE
 
 DEPENDENCIES = Path("dependencies/")
@@ -84,8 +90,8 @@ hours = 0
 count_downer = 0
 count_upper = 0
 note_writer_first_gap = 0
-MAIN_MINUTE_FONT_SIZE = 30
-MAIN_HOUR_FONT_SIZE = 30
+MAIN_MINUTE_FONT_SIZE = 28
+MAIN_HOUR_FONT_SIZE = 20
 FLOATING_MINUTE_FONT_SIZE = 26
 FLOATING_HOUR_FONT_SIZE = 23
 HOURS_X=125
@@ -101,8 +107,12 @@ paused = False
 start_short_break= False
 start_long_break = False
 open_floating_window = False
+start_timer_checker_2 = False # FOR THE FIX FIRST SECOND GLITCH
+#TODO: ADD A WARNING TO RESET BUTTON TO THIS "ARE YOU SURE?"
+#TODO: CHANGE THE 00:00'S COLOR WHITE TO ANY COLOR
 #TODO: LONG_BREAK 05:00 TEXTİNİ DİNAMİK YAP
-#TODO: CHANE THE COLORS NAME, THEY ARE WRONG
+#TODO: CHANGE THE COLORS NAME, THEY ARE WRONG
+
 # ------------------------------ SOME BOOT-UPS --------------------------------- #
 
 # Creating time.csv
@@ -124,8 +134,8 @@ def connect_to_pixela():
         "notMinor": "yes"
     }
     # creates user
-    response = requests.post(url=PIXELA_ENDPOINT, json=params)
-    print(response.text)
+    # response = requests.post(url=PIXELA_ENDPOINT, json=params)
+
 
     graphic_endpoint = f"{PIXELA_ENDPOINT}{USERNAME}/graphs"
     graphic_params = {
@@ -139,7 +149,7 @@ def connect_to_pixela():
     }
 
     # creates graph
-    graph_response = requests.post(url=graphic_endpoint, json=graphic_params, headers=headers)
+    # graph_response = requests.post(url=graphic_endpoint, json=graphic_params, headers=headers)
     add_pixel_endpoint = f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}"
     pixels_params = {
         "date": DATE,
@@ -255,14 +265,17 @@ def reset():
 
 # ---------------------------- CRONOMETER MECHANISM ------------------------------- #
 def crono():
-    global count_upper, second, minute, hours, show_hours
+    global count_upper, second, minute, hours, show_hours, start_timer_checker_2
     timer_label.config(text="WORK", fg=RED)
+    # For the starting second, otherwise there will be a bug
+    if not start_timer_checker_2:
+        second +=1 
     if not show_hours:
         canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
         floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold")) #? IS THIS EVEN WORKING??
         floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
     # Update the timer display every second
-    second += 1
+ 
     if second == 60:
         second = 0
         minute += 1
@@ -274,14 +287,18 @@ def crono():
         canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, MAIN_HOUR_FONT_SIZE, "bold"))
         floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold"))
         floating_timer_label.place(x=HOURS_X, y=HOURS_Y)
+    if start_timer_checker_2:
+        second +1
+        start_timer_checker_2 = False
     # You can change the speed of countup here
     count_upper = root.after(1000, crono)
 
 
 # --------------------------- COUNTDOWN MECHANISM ------------------------------- #
 def start_timer():
-    global start_timer_checker, pause_checker, condition_checker, pomodoro_mode_activate, crono_mode_activate, start_short_break, start_long_break
+    global start_timer_checker, pause_checker, condition_checker, pomodoro_mode_activate, crono_mode_activate, start_short_break, start_long_break, start_timer_checker_2
     condition_checker = False
+    start_timer_checker_2 = True
     if pomodoro_mode_activate:
         start_timer_checker += 1
         pause_checker = 1
@@ -367,7 +384,6 @@ def count_down(count):
 #TODO: SOMETIMES, WHEN YOU PAUSE THEN START TIMER SKIPS THE ANOTHER SECOND, FIX IT
 
 def pause_timer():
-    # if pause_checker == 1:
     global pomodoro_mode_activate, crono_mode_activate, resume, count_downer, count_upper, minute, second, paused,start_short_break, start_long_break,short_break_sec, long_break_sec, condition_checker
     if pomodoro_mode_activate:
         if not condition_checker:
@@ -427,7 +443,7 @@ def pause_timer():
                 resume = 0
                 timer_label.config(text="WORK", fg=RED)
                 pause_button.config(text=f"Pause")
-                count_upper = root.after(500, crono)
+                count_upper = root.after(1000, crono)
     else:
         print("Error: No mode selected")
 
@@ -451,7 +467,6 @@ def save_data():
             saved_data["time"].append(f"{hours:02d}:{minute:02d}:{second:02d}")
             saved_data["notes"].append(saved_note)
         else:
-            # add_note = tkinter.messagebox.Messagebox("Add note:", f"Time: {minute:02d}:{second:02}")
             saved_note = askstring('Save your note', 'Write your note:')
             if saved_note == "pass" or saved_note == "" or saved_note=="None":
                 return
@@ -480,7 +495,7 @@ def save_data():
         tkinter.messagebox.showerror("Error", "You need to be in stopwatch mode to use save button.")
     # save this data to a pixela website
     try:
-        if crono_mode_activate():
+        if crono_mode_activate:
             connect_to_pixela()
     except requests.exceptions.ConnectionError:
         print("Connection Error: Unable to connect to Pixela.")
@@ -488,7 +503,11 @@ def save_data():
         connect_to_pixela()
     except Exception as e:
         print(f"An error occurred: {e}")
-
+# def toggle():
+#     if switch_button.config('text')[-1] == 'DARK':
+#         switch_button.config(text='LIGHT', bg=SWITCH_BUTTON_LIGHT_BG_COLOR, fg=SWITCH_BUTTON_LIGHT_FG_COLOR)
+#     else:
+#         switch_button.config(text='DARK', bg=SWITCH_BUTTON_DARK_BG_COLOR, fg=SWITCH_BUTTON_DARK_FG_COLOR)
 def center_window(window):
     window.update_idletasks()
     width = window.winfo_width()
@@ -578,8 +597,8 @@ logo.place(x=-300, y=230)
 # Tomato
 canvas = Canvas(width=200, height=240, bg=YELLOW, highlightthickness=0)
 tomato_img = PhotoImage(file=MAIN_IMAGE_PATH)
-canvas.create_image(100, 112, image=tomato_img) #? IT'S CENTER THE IMAGE
-timer = canvas.create_text(103, 130, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"), fill="white")
+canvas.create_image(100, 120, image=tomato_img) #? IT'S CENTER THE IMAGE
+timer = canvas.create_text(100, 130, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"), fill="white")
 canvas.grid(column=1, row=1)
 
 # labels
@@ -635,8 +654,11 @@ radiobutton2 = Radiobutton(text="Stopwatch", value=2, variable=radio_state, comm
                            highlightthickness=0, 
                            background=RADIO_BACKGROUND_COLOR, foreground=RADIO_FOREGROUND_COLOR,
                            activebackground=RADIO_BACKGROUND_COLOR, activeforeground=RADIO_FOREGROUND_COLOR)
-radiobutton1.place(x=200, y=-20)
+radiobutton1.place(x=200, y=-20) 
 radiobutton2.place(x=200, y=-0)
+
+# switch_button = Button(root, text="DARK", bg=SWITCH_BUTTON_DARK_BG_COLOR, fg=SWITCH_BUTTON_DARK_FG_COLOR, width=5, height=1, command=toggle)
+# switch_button.place(x=226, y=40)
 
 # Floating timer remebers the mode
 window.withdraw()
