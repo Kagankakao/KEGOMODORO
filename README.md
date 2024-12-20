@@ -87,7 +87,7 @@ KEGOMODORO is a Pomodoro timer application designed to help you manage your time
 
 ### Pixela Integration
 
-To use Pixela integration, follow these steps:
+To use Pixela, follow these steps:
 
 1. **Create a Pixela Account**
 
