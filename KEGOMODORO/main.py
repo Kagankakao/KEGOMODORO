@@ -9,15 +9,16 @@ import datetime
 import time
 import pygame
 from tkinter import *
+import tkinter as tk
+from tkinter import simpledialog
 from tkinter.simpledialog import askstring
-from tkinter.messagebox import showinfo
+from tkinter.messagebox import showinfo, askyesno
 from pyautogui import position
 from time import sleep
 from keyboard import is_pressed
 from PIL import Image, ImageTk
 from pathlib import Path
 # ---------------------------- CONSTANTS AND SOME VARIABLES ------------------------------- #
-# Change working directory to the script's location
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 BLACK = "#000000"
 PINK = "#e2979c"
@@ -39,21 +40,18 @@ SWITCH_BUTTON_DARK_BG_COLOR = BLACK
 SWITCH_BUTTON_DARK_FG_COLOR = WHITE
 SWITCH_BUTTON_LIGHT_BG_COLOR = WHITE
 SWITCH_BUTTON_LIGHT_FG_COLOR = BLACK
-
-#TODO: WHEN RESTING THE TIMER SAVE IT!
-#TODO: UPDATE THE SAVE YOUR NOTE SECTION
-#TODO: CHANGE THE THEMES
-PIXELA_ENDPOINT = "https://pixe.la/v1/users" #! FILL HERE
-USERNAME = "kegan"
-TOKEN = "afhus8hj2phfb29nn821r"
-GRAPH_ID = "graph1" #! FILL HERE
+# ---------------------------- PIXELA CONFIGS ------------------------------- #
+PIXELA_ENDPOINT = "https://pixe.la/v1/users" 
+USERNAME = "" #! FILL HERE
+TOKEN = "" #! FILL HERE
+GRAPH_ID = "" #! FILL HERE
 
 DEPENDENCIES = Path("dependencies/")
 IMAGES = f"{DEPENDENCIES}/images"
 AUDIOS = f"{DEPENDENCIES}/audios"
 TEXTS = f"{DEPENDENCIES}/texts"
 
-SAVE_FILE_NAME = f"{TEXTS}/KAÆ[Æß#.txt" # ! Change this to your desired file name
+SAVE_FILE_NAME = f"{TEXTS}/notes.txt" # ! Change this to your desired file name
 BREAK_SOUND_PATH = f"{AUDIOS}/ding.mp3"
 APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! THIS IS THE ICON STUFF SO CHANGE THIS
 FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.png"
@@ -108,11 +106,6 @@ start_short_break= False
 start_long_break = False
 open_floating_window = False
 start_timer_checker_2 = False # FOR THE FIX FIRST SECOND GLITCH
-#TODO: ADD A WARNING TO RESET BUTTON TO THIS "ARE YOU SURE?"
-#TODO: CHANGE THE 00:00'S COLOR WHITE TO ANY COLOR
-#TODO: LONG_BREAK 05:00 TEXTİNİ DİNAMİK YAP
-#TODO: CHANGE THE COLORS NAME, THEY ARE WRONG
-
 # ------------------------------ SOME BOOT-UPS --------------------------------- #
 
 # Creating time.csv
@@ -185,6 +178,9 @@ def pomodoro_mode():
 
 def crono_mode():
     global crono_mode_activate, pomodoro_mode_activate, second, minute, hours, show_hours, crono_reset
+    if crono_mode_activate:
+        with open(TIME_CSV_PATH, mode='a') as file:
+            file.write(f"{hours},{minute},{second}\n")
     reset()
     crono_mode_activate = True
     pomodoro_mode_activate = False
@@ -224,45 +220,41 @@ def floating_window(**kwargs):
         checked_state.set(0)
     with open(FLOATING_WINDOW_CHECKER_PATH, "w") as f:
         f.write(str(open_floating_window))
-
-
-
-
 # ----------------------------TIMER RESET ------------------------------- #
 def reset():
     global reps, count_downer, count_upper, start_timer_checker, minute, second, pause_checker, \
-        condition_checker, pomodoro_mode_activate, crono_mode_activate, hours, show_hours, resume
-    if pomodoro_mode_activate:
-        try:
-            root.after_cancel(count_downer)
-        except Exception as e:
-            print(f"Error: {e}")
-    elif crono_mode_activate:
-        try:
-            root.after_cancel(count_upper)
-        except Exception as e:
-            print(f"Error: {e}")
+        condition_checker, pomodoro_mode_activate, crono_mode_activate, hours, show_hours, resume, reset_pass
+    if askyesno("Reset Timer", "Are you sure you want to reset the timer?"):
+        if pomodoro_mode_activate:
+            try:
+                root.after_cancel(count_downer)
+            except Exception as e:
+                print(f"Error: {e}")
+        elif crono_mode_activate:
+            try:
+                root.after_cancel(count_upper)
+            except Exception as e:
+                print(f"Error: {e}")
 
 
-    else:
-        print("Error: No mode selected")
-    timer_label.config(text="TIMER", fg=GREEN)
-    check_mark.config(text="")
-    reps = 1
-    start_timer_checker = 0
-    resume = 0
-    hours = 0
-    minute = 0
-    second = 0
-    condition_checker = True
-    show_hours = False
-    # pause_checker = 0
-    pause_button.config(text=f"Pause")
-    canvas.itemconfig(timer, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"))
-    floating_timer_label.config(text="00:00", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold"))
-    floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
+        else:
+            print("Error: No mode selected")
+        timer_label.config(text="TIMER", fg=GREEN)
+        check_mark.config(text="")
+        reps = 1
+        start_timer_checker = 0
+        resume = 0
+        hours = 0
+        minute = 0
+        second = 0
+        condition_checker = True
+        show_hours = False
+        # pause_checker = 0
+        pause_button.config(text=f"Pause")
+        canvas.itemconfig(timer, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"))
+        floating_timer_label.config(text="00:00", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold"))
+        floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
     
-
 # ---------------------------- CRONOMETER MECHANISM ------------------------------- #
 def crono():
     global count_upper, second, minute, hours, show_hours, start_timer_checker_2
@@ -292,8 +284,6 @@ def crono():
         start_timer_checker_2 = False
     # You can change the speed of countup here
     count_upper = root.after(1000, crono)
-
-
 # --------------------------- COUNTDOWN MECHANISM ------------------------------- #
 def start_timer():
     global start_timer_checker, pause_checker, condition_checker, pomodoro_mode_activate, crono_mode_activate, start_short_break, start_long_break, start_timer_checker_2
@@ -381,7 +371,6 @@ def count_down(count):
         global start_timer_checker
         start_timer_checker = 0
         start_timer()
-#TODO: SOMETIMES, WHEN YOU PAUSE THEN START TIMER SKIPS THE ANOTHER SECOND, FIX IT
 
 def pause_timer():
     global pomodoro_mode_activate, crono_mode_activate, resume, count_downer, count_upper, minute, second, paused,start_short_break, start_long_break,short_break_sec, long_break_sec, condition_checker
@@ -458,7 +447,7 @@ def save_data():
             file.write(f"{hours},{minute},{second}\n")
 
         if show_hours:
-            saved_note = askstring('', 'Write your note:')
+            saved_note = large_askstring("Save your note", "Write your note:")
             if saved_note == "pass" or saved_note == "" or saved_note=="None":
                 return
             else: 
@@ -467,7 +456,7 @@ def save_data():
             saved_data["time"].append(f"{hours:02d}:{minute:02d}:{second:02d}")
             saved_data["notes"].append(saved_note)
         else:
-            saved_note = askstring('Save your note', 'Write your note:')
+            saved_note = large_askstring("Save your note", "Write your note:")
             if saved_note == "pass" or saved_note == "" or saved_note=="None":
                 return
             else: 
@@ -531,6 +520,23 @@ ico = Image.open(APP_ICON_PATH)
 photo = ImageTk.PhotoImage(ico)
 root.wm_iconphoto(False, photo)
 root.geometry("+700+300") #! ADJUSTS THE STARTING LOCATION OF WINDOW
+
+# ---------------------------- LARGE ASKSTRING ------------------------------- #
+class LargeAskStringDialog(simpledialog.Dialog):
+    def body(self, master):
+        tk.Label(master, text="Write your note:").grid(row=0)
+        self.text = tk.Text(master, height=10, width=50)
+        self.text.grid(row=1)
+        return self.text
+
+    def apply(self):
+        self.result = self.text.get("1.0", tk.END).strip()
+
+def large_askstring(title, prompt):
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+    dialog = LargeAskStringDialog(root, title=title)
+    return dialog.result
 # ---------------------------- FLOATING WINDOW SETUP ------------------------------- #
 class DraggableWindow(Toplevel):
     def __init__(self):
