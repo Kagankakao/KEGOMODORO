@@ -97,6 +97,7 @@ HOURS_Y=170
 MINUTE_X=160
 MINUTE_Y=168
 
+reset_pass = True
 show_hours = False
 pomodoro_mode_activate = False
 crono_mode_activate = False
@@ -167,21 +168,25 @@ def connect_to_pixela():
         connect_to_pixela()
 # ----------------------------MODS---------------------------- #
 def pomodoro_mode():
-    global pomodoro_mode_activate, crono_mode_activate, hours, minute, second
+    global pomodoro_mode_activate, crono_mode_activate, hours, minute, second, reset_pass
     if crono_mode_activate:
         with open(TIME_CSV_PATH, mode='a') as file:
             file.write(f"{hours},{minute},{second}\n")
+    reset_pass = True
     reset()
+    reset_pass = False
     crono_mode_activate = False
     pomodoro_mode_activate = True
 
 
 def crono_mode():
-    global crono_mode_activate, pomodoro_mode_activate, second, minute, hours, show_hours, crono_reset
+    global crono_mode_activate, pomodoro_mode_activate, second, minute, hours, show_hours, crono_reset,reset_pass
     if crono_mode_activate:
         with open(TIME_CSV_PATH, mode='a') as file:
             file.write(f"{hours},{minute},{second}\n")
+    reset_pass = True
     reset()
+    reset_pass = False
     crono_mode_activate = True
     pomodoro_mode_activate = False
 
@@ -224,7 +229,7 @@ def floating_window(**kwargs):
 def reset():
     global reps, count_downer, count_upper, start_timer_checker, minute, second, pause_checker, \
         condition_checker, pomodoro_mode_activate, crono_mode_activate, hours, show_hours, resume, reset_pass
-    if askyesno("Reset Timer", "Are you sure you want to reset the timer?"):
+    if reset_pass or askyesno("Reset Timer", "Are you sure you want to reset the timer?"):
         if pomodoro_mode_activate:
             try:
                 root.after_cancel(count_downer)
@@ -448,19 +453,19 @@ def save_data():
 
         if show_hours:
             saved_note = large_askstring("Save your note", "Write your note:")
-            if saved_note == "pass" or saved_note == "" or saved_note=="None":
+            if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
                 return
             else: 
-                showinfo("Saved!", 'Your note: {}'.format(saved_note))
+                showinfo("Your note:", '{}'.format(saved_note))
             saved_data["date"].append(dt.datetime.now().strftime("%Y-%m-%d"))
             saved_data["time"].append(f"{hours:02d}:{minute:02d}:{second:02d}")
             saved_data["notes"].append(saved_note)
         else:
             saved_note = large_askstring("Save your note", "Write your note:")
-            if saved_note == "pass" or saved_note == "" or saved_note=="None":
+            if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
                 return
             else: 
-                showinfo("Saved!", 'Your note: {}'.format(saved_note))
+                showinfo("Your note:", '{}'.format(saved_note))
             saved_data["date"].append(dt.datetime.now().strftime("%Y-%m-%d"))
             saved_data["time"].append(f"{minute:02d}:{second:02d}")
             saved_data["notes"].append(saved_note)
