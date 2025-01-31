@@ -21,20 +21,18 @@ from pathlib import Path
 # ---------------------------- CONSTANTS AND SOME VARIABLES ------------------------------- #
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 BLACK = "#000000"
+WHITE = "#feffff"
 PINK = "#e2979c"
-RED = "#000000"
-GREEN = "#EB5B00"
-YELLOW = "#8B0000"
-ORANGE = "#fcba03"
-DEEP_BLUE = "#000000"
+ORANGE = "#EB5B00"
+DARK_RED = "#8B0000"
+GOLD_COLOR = "#fcba03"
 DEEP_RED = "#cc2b33"
 FONT_NAME = "Courier"
 TOMATO_COLOR = "#f26849"
-GRAY_COLOR = "#696969"
-WHITE = "#feffff"
+DARK_GRAY = "#696969"
 BUTTON_BACKGROUND_COLOR = BLACK
 BUTTON_FOREGROUND_COLOR = WHITE
-RADIO_BACKGROUND_COLOR = "#8B0000"
+RADIO_BACKGROUND_COLOR = DARK_RED
 RADIO_FOREGROUND_COLOR = BLACK
 SWITCH_BUTTON_DARK_BG_COLOR = BLACK
 SWITCH_BUTTON_DARK_FG_COLOR = WHITE
@@ -244,7 +242,7 @@ def reset():
 
         else:
             print("Error: No mode selected")
-        timer_label.config(text="TIMER", fg=GREEN)
+        timer_label.config(text="TIMER", fg=ORANGE)
         check_mark.config(text="")
         reps = 1
         start_timer_checker = 0
@@ -263,7 +261,7 @@ def reset():
 # ---------------------------- CRONOMETER MECHANISM ------------------------------- #
 def crono():
     global count_upper, second, minute, hours, show_hours, start_timer_checker_2
-    timer_label.config(text="WORK", fg=RED)
+    timer_label.config(text="WORK", fg=BLACK)
     # For the starting second, otherwise there will be a bug
     if not start_timer_checker_2:
         second +=1 
@@ -321,7 +319,7 @@ def start_timer():
             elif reps % 2 == 1:
                 if reps == 1:
                     check_mark.config(text="")
-                timer_label.config(text="Work", fg=RED)
+                timer_label.config(text="Work", fg=BLACK)
                 count_down(work_sec)
                 reps += 1
 
@@ -353,7 +351,7 @@ def start_timer():
         if start_timer_checker == 1:
             crono()
     else:
-        tkinter.messagebox.showerror("Error", "No mode selected!")
+        tkinter.messagebox.showerror("Choose a mod", "No mode selected!")
 
 
 def count_down(count):
@@ -392,7 +390,7 @@ def pause_timer():
 
             second = second_int
             minute = minute_int
-            timer_label.config(text=f"Paused", fg=DEEP_BLUE)
+            timer_label.config(text=f"Paused", fg=BLACK)
             pause_button.config(text=f"Resume")
             if resume == 2:
                 paused = False
@@ -410,12 +408,12 @@ def pause_timer():
                     root.after(1201000, pause_timer)
                 else:
                     count_down(minute * 60 + second)
-                    timer_label.config(text="Work", fg=RED)
+                    timer_label.config(text="Work", fg=BLACK)
 
     elif crono_mode_activate:
         if not condition_checker:
             root.after_cancel(count_upper)
-            timer_label.config(text=f"Paused", fg=DEEP_BLUE) 
+            timer_label.config(text=f"Paused", fg=BLACK) 
             pause_button.config(text=f"Resume")
             second_int = second
             minute_int = minute
@@ -435,7 +433,7 @@ def pause_timer():
             if resume == 2:
                 paused = False
                 resume = 0
-                timer_label.config(text="WORK", fg=RED)
+                timer_label.config(text="WORK", fg=BLACK)
                 pause_button.config(text=f"Pause")
                 count_upper = root.after(1000, crono)
     else:
@@ -519,7 +517,7 @@ def on_closing():
 # ---------------------------- UI SETUP ------------------------------- #
 root = Tk()
 root.title("KEGOMODORO")
-root.config(padx=100, pady=50, bg=YELLOW)
+root.config(padx=100, pady=50, bg=DARK_RED)
 root.resizable(False, False)
 ico = Image.open(APP_ICON_PATH) 
 photo = ImageTk.PhotoImage(ico)
@@ -599,28 +597,28 @@ floating_timer_label.pack()
 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
 
 # Kegan Software
-logo = Canvas(width=600, height=224, bg=YELLOW, highlightthickness=0)
+logo = Canvas(width=600, height=224, bg=DARK_RED, highlightthickness=0)
 logo_img = PhotoImage(file=LOGO_IMAGE_PATH)
 logo.create_image(300, 112, image=logo_img)
 logo.grid(column=1, row=0)
 logo.place(x=-300, y=230)
 
 # Tomato
-canvas = Canvas(width=200, height=240, bg=YELLOW, highlightthickness=0)
+canvas = Canvas(width=200, height=240, bg=DARK_RED, highlightthickness=0)
 tomato_img = PhotoImage(file=MAIN_IMAGE_PATH)
 canvas.create_image(100, 120, image=tomato_img) #? IT'S CENTER THE IMAGE
 timer = canvas.create_text(100, 130, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"), fill="white")
 canvas.grid(column=1, row=1)
 
 # labels
-timer_label = Label(text="TIMER", font=(FONT_NAME, 40, "bold"), bg=YELLOW, fg=GREEN)
+timer_label = Label(text="TIMER", font=(FONT_NAME, 40, "bold"), bg=DARK_RED, fg=ORANGE)
 timer_label.grid(column=1, row=0)
 
-modes_label = Label(text="Modes", font=(FONT_NAME, 20, "bold"), bg=YELLOW, fg=ORANGE)
+modes_label = Label(text="Modes", font=(FONT_NAME, 20, "bold"), bg=DARK_RED, fg=GOLD_COLOR)
 modes_label.grid(column=1, row=0)
 modes_label.place(x=200, y=-50)
 
-check_mark = Label(font=(FONT_NAME, 15, "bold"), bg=YELLOW, fg=GREEN)
+check_mark = Label(font=(FONT_NAME, 15, "bold"), bg=DARK_RED, fg=ORANGE)
 check_mark.grid(column=1, row=3)
 check_mark.place(x=120, y=300)
 
