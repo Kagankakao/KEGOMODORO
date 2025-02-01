@@ -50,7 +50,8 @@ AUDIOS = f"{DEPENDENCIES}/audios"
 TEXTS = f"{DEPENDENCIES}/texts"
 
 SAVE_FILE_NAME = f"{TEXTS}/notes.txt" # ! Change this to your desired file name
-BREAK_SOUND_PATH = f"{AUDIOS}/ding.mp3"
+BREAK_SOUND_PATH = f"{AUDIOS}/short_break.mp3"
+LONG_BREAK_SOUND_PATH = f"{AUDIOS}/long_break.mp3"
 APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! THIS IS THE ICON STUFF SO CHANGE THIS
 FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.png"
 LOGO_IMAGE_PATH = f"{IMAGES}/logo2.png"
@@ -60,6 +61,7 @@ TIME_CSV_PATH = f"{TEXTS}/time.csv"
 # Load to audio file
 pygame.mixer.init()
 BREAK_SOUND = pygame.mixer.Sound(BREAK_SOUND_PATH)
+LONG_BREAK_SOUND = pygame.mixer.Sound(LONG_BREAK_SOUND_PATH)
 # Audio volume
 BREAK_SOUND.set_volume(0.5)
 #TODO: CHANGE THE SAVE NOTE ICON
@@ -95,6 +97,8 @@ HOURS_Y=170
 MINUTE_X=160
 MINUTE_Y=168
 
+long_break_pause = False
+pause_pomodoro_mode = False
 reset_pass = True
 show_hours = False
 pomodoro_mode_activate = False
@@ -287,7 +291,7 @@ def crono():
 # --------------------------- COUNTDOWN MECHANISM ------------------------------- #
 def start_timer():
     global start_timer_checker, pause_checker, condition_checker, pomodoro_mode_activate, crono_mode_activate, start_short_break, start_long_break, \
-    start_timer_checker_2, reps
+    start_timer_checker_2, reps, temp_work_sec, long_break_pause
     condition_checker = False
     start_timer_checker_2 = True
     if pomodoro_mode_activate:
@@ -299,25 +303,32 @@ def start_timer():
             short_break_sec = SHORT_BREAK_MIN * 60
             long_break_sec = LONG_BREAK_MIN * 60
             if reps % 8 == 0:
-                BREAK_SOUND.play()
-                variable = condition_checker
+                LONG_BREAK_SOUND.play()
+                temp = condition_checker
                 condition_checker = False
                 start_long_break = True
                 pause_timer()
-                condition_checker = variable
+                condition_checker = temp
                 timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
                 canvas.itemconfig(timer, text=f"20:00")
                 floating_timer_label.config(text="20:00")
                 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
-                condition_checker = variable
+                condition_checker = temp
                 check_mark.config(text="✔✔✔✔")
                 check_mark.place(x=60, y=290)
+                long_break_pause = True
                 reps = 1
             elif reps % 2 == 1:
-                if reps == 1:
+                if reps == 1 and not long_break_pause:
                     check_mark.config(text="")
-                timer_label.config(text="Work", fg=BLACK)
-                count_down(work_sec)
+                    timer_label.config(text="Work", fg=BLACK)
+                    count_down(work_sec)
+                else:
+                    if long_break_pause:
+                        long_break_pause = False
+                        check_mark.config(text="")
+                    pause_pomodoro() 
+                    temp_work_sec = work_sec # export to pause_timer's global
                 reps += 1
 
             else:
@@ -331,11 +342,11 @@ def start_timer():
                     check_mark.config(text="✔✔✔")
                     check_mark.place(x=70, y=290)
                 BREAK_SOUND.play()
-                variable = condition_checker
+                temp = condition_checker
                 condition_checker = False
                 start_short_break = True
                 pause_timer()
-                condition_checker = variable
+                condition_checker = temp
                 timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
                 canvas.itemconfig(timer, text=f"05:00")
                 floating_timer_label.config(text="05:00")
@@ -371,8 +382,15 @@ def count_down(count):
         start_timer()
 
 def pause_timer():
-    global pomodoro_mode_activate, crono_mode_activate, resume, count_downer, count_upper, minute, second, paused,start_short_break, start_long_break,short_break_sec, long_break_sec, condition_checker
-    if pomodoro_mode_activate:
+    global pomodoro_mode_activate, crono_mode_activate, resume, count_downer, \
+    count_upper, minute, second, paused,start_short_break, start_long_break,short_break_sec, \
+    long_break_sec, condition_checker, pause_pomodoro_mode, temp_work_sec
+    if pomodoro_mode_activate and pause_pomodoro_mode:
+        pause_pomodoro_mode = False
+        timer_label.config(text="Work", fg=BLACK) # check floating window too
+        pause_button.config(text=f"Pause")
+        count_down(temp_work_sec)
+    elif pomodoro_mode_activate:
         if not condition_checker:
             root.after_cancel(count_downer)
             second_int = second
@@ -395,12 +413,12 @@ def pause_timer():
                     start_short_break = False
                     count_down(SHORT_BREAK_MIN * 60 + second)
                     timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
-                    root.after(301000, pause_timer) #! PROBLEMATIC
+                    # root.after(301000, pause_timer) #! PROBLEMATIC
                 elif start_long_break:
                     start_long_break = False
                     count_down(LONG_BREAK_MIN * 60 + second)
                     timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
-                    root.after(1201000, pause_timer)
+                    # root.after(1201000, pause_timer)
                 else:
                     count_down(minute * 60 + second)
                     timer_label.config(text="Work", fg=BLACK)
@@ -433,7 +451,13 @@ def pause_timer():
                 count_upper = root.after(1000, crono)
     else:
         print("Error: No mode selected")
-
+def pause_pomodoro():
+    global pause_pomodoro_mode
+    pause_pomodoro_mode = not pause_pomodoro_mode
+    timer_label.config(text=f"Work", fg=BLACK)
+    canvas.itemconfig(timer, text=f"25:00")
+    floating_timer_label.config(text="25:00")
+    pause_button.config(text=f"Resume")
 
 def save_data():
     global hours, minute, second, crono_mode_activate, show_hours, saved_data, crono_reset, paused, note_writer_first_gap
