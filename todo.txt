@@ -2,6 +2,14 @@
 
 # CHANGE THE TICKS COLOR
 
+#SAVE PIXELA
+
+#CREATE USER IN PIXELA
+
+
+
+# WHEN BREAK OR WORK OVER/STARTS MAKE IT POP UP
+
 # Change working directory to the script's location
 
 #TODO: CHANGE THE THEMES

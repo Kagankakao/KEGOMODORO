@@ -1,36 +1,23 @@
 import tkinter as tk
 from tkinter import messagebox
 
-def reset_timer():
-    if messagebox.askyesno("Reset Timer", "Are you sure you want to reset the timer?"):
-        global hours, minute, second, crono_mode_activate, show_hours, saved_data, crono_reset, paused, note_writer_first_gap
-        # Add your reset logic here
-        crono_reset = True
-        paused = False
-        hours = 0
-        minute = 0
-        second = 0
-        note_writer_first_gap = True
-        # Reset other necessary variables and UI elements
-        canvas.itemconfig(timer, text="00:00")
-        floating_timer_label.config(text="00:00")
-        # Cancel any running timers
-        if 'count_downer' in globals():
-            root.after_cancel(count_downer)
-        if 'count_upper' in globals():
-            root.after_cancel(count_upper)
-        showinfo("Reset", "Timer has been reset.")
+def open_popup():
+    popup = tk.Toplevel(root)
+    popup.title("Pop-Up Window")
+    popup.geometry("300x200")
 
-# Example usage of reset_timer function
-if __name__ == "__main__":
-    root = tk.Tk()
-    canvas = tk.Canvas(root, width=200, height=200)
-    canvas.pack()
-    timer = canvas.create_text(100, 100, text="00:00", font=("Helvetica", 24))
-    floating_timer_label = tk.Label(root, text="00:00", font=("Helvetica", 24))
-    floating_timer_label.pack()
+    label = tk.Label(popup, text="This is a pop-up window!", font=("Arial", 12))
+    label.pack(pady=20)
 
-    reset_button = tk.Button(root, text="Reset", command=reset_timer)
-    reset_button.pack()
+    close_button = tk.Button(popup, text="Close", command=popup.destroy)
+    close_button.pack(pady=10)
 
-    root.mainloop()
+# Main Window
+root = tk.Tk()
+root.title("Main Window")
+root.geometry("400x300")
+
+button = tk.Button(root, text="Open Pop-Up", command=open_popup)
+button.pack(pady=20)
+
+root.mainloop()

@@ -50,16 +50,21 @@ AUDIOS = f"{DEPENDENCIES}/audios"
 TEXTS = f"{DEPENDENCIES}/texts"
 
 SAVE_FILE_NAME = f"{TEXTS}/notes.txt" # ! Change this to your desired file name
+FLOATING_WINDOW_CHECKER_PATH = f"{TEXTS}/floating_window_checker.txt"
+TIME_CSV_PATH = f"{TEXTS}/time.csv"
+
+WORK_SOUND_PATH = f"{AUDIOS}/work.mp3"
 BREAK_SOUND_PATH = f"{AUDIOS}/short_break.mp3"
 LONG_BREAK_SOUND_PATH = f"{AUDIOS}/long_break.mp3"
+
 APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! THIS IS THE ICON STUFF SO CHANGE THIS
 FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.png"
 LOGO_IMAGE_PATH = f"{IMAGES}/logo2.png"
 MAIN_IMAGE_PATH = f"{IMAGES}/space_tomato2.png"
-FLOATING_WINDOW_CHECKER_PATH = f"{TEXTS}/floating_window_checker.txt"
-TIME_CSV_PATH = f"{TEXTS}/time.csv"
+
 # Load to audio file
 pygame.mixer.init()
+WORK_SOUND = pygame.mixer.Sound(WORK_SOUND_PATH)
 BREAK_SOUND = pygame.mixer.Sound(BREAK_SOUND_PATH)
 LONG_BREAK_SOUND = pygame.mixer.Sound(LONG_BREAK_SOUND_PATH)
 # Audio volume
@@ -179,6 +184,8 @@ def pomodoro_mode():
     reset_pass = False
     crono_mode_activate = False
     pomodoro_mode_activate = True
+    canvas.itemconfig(timer, text=f"25:00")
+    floating_timer_label.config(text="25:00")
 
 
 def crono_mode():
@@ -230,7 +237,8 @@ def floating_window(**kwargs):
 # ----------------------------TIMER RESET ------------------------------- #
 def reset():
     global reps, count_downer, count_upper, start_timer_checker, minute, second, pause_checker, \
-        condition_checker, pomodoro_mode_activate, crono_mode_activate, hours, show_hours, resume, reset_pass
+        condition_checker, pomodoro_mode_activate, crono_mode_activate, hours, show_hours, resume,\
+        reset_pass, pause_pomodoro_mode
     if reset_pass or askyesno("Reset Timer", "Are you sure you want to reset the timer?"):
         if pomodoro_mode_activate:
             try:
@@ -256,6 +264,7 @@ def reset():
         second = 0
         condition_checker = True
         show_hours = False
+        pause_pomodoro_mode = False
         # pause_checker = 0
         pause_button.config(text=f"Pause")
         canvas.itemconfig(timer, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"))
@@ -324,6 +333,7 @@ def start_timer():
                     timer_label.config(text="Work", fg=BLACK)
                     count_down(work_sec)
                 else:
+                    WORK_SOUND.play()
                     if long_break_pause:
                         long_break_pause = False
                         check_mark.config(text="")
@@ -451,6 +461,7 @@ def pause_timer():
                 count_upper = root.after(1000, crono)
     else:
         print("Error: No mode selected")
+
 def pause_pomodoro():
     global pause_pomodoro_mode
     pause_pomodoro_mode = not pause_pomodoro_mode
@@ -514,11 +525,7 @@ def save_data():
         connect_to_pixela()
     except Exception as e:
         print(f"An error occurred: {e}")
-# def toggle():
-#     if switch_button.config('text')[-1] == 'DARK':
-#         switch_button.config(text='LIGHT', bg=SWITCH_BUTTON_LIGHT_BG_COLOR, fg=SWITCH_BUTTON_LIGHT_FG_COLOR)
-#     else:
-#         switch_button.config(text='DARK', bg=SWITCH_BUTTON_DARK_BG_COLOR, fg=SWITCH_BUTTON_DARK_FG_COLOR)
+
 def center_window(window):
     window.update_idletasks()
     width = window.winfo_width()
@@ -530,9 +537,10 @@ def center_window(window):
     window.geometry(f"{width}x{height}+{x}+{y}")
 
 def on_closing():
-    with open(TIME_CSV_PATH, mode='a') as file:
-        file.write(f"{hours},{minute},{second}\n")
-        root.destroy()
+    if not pomodoro_mode_activate:
+        with open(TIME_CSV_PATH, mode='a') as file:
+            file.write(f"{hours},{minute},{second}\n")
+    root.destroy()
 # ---------------------------- UI SETUP ------------------------------- #
 root = Tk()
 root.title("KEGOMODORO")
@@ -688,7 +696,7 @@ radiobutton2.place(x=200, y=-0)
 # switch_button = Button(root, text="DARK", bg=SWITCH_BUTTON_DARK_BG_COLOR, fg=SWITCH_BUTTON_DARK_FG_COLOR, width=5, height=1, command=toggle)
 # switch_button.place(x=226, y=40)
 
-# Floating timer remebers the mode
+# Floating timer will remeber the mode
 window.withdraw()
 try:
     with open(FLOATING_WINDOW_CHECKER_PATH, "r") as file:
