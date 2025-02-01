@@ -22,7 +22,7 @@ from pathlib import Path
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 BLACK = "#000000"
 WHITE = "#feffff"
-PINK = "#e2979c"
+DEEP_GOLD_COLOR = "#EFB036"
 ORANGE = "#EB5B00"
 DARK_RED = "#8B0000"
 GOLD_COLOR = "#fcba03"
@@ -262,15 +262,8 @@ def reset():
 def crono():
     global count_upper, second, minute, hours, show_hours, start_timer_checker_2
     timer_label.config(text="WORK", fg=BLACK)
-    # For the starting second, otherwise there will be a bug
     if not start_timer_checker_2:
         second +=1 
-    if not show_hours:
-        canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
-        floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold")) #? IS THIS EVEN WORKING??
-        floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
-    # Update the timer display every second
- 
     if second == 60:
         second = 0
         minute += 1
@@ -282,6 +275,10 @@ def crono():
         canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, MAIN_HOUR_FONT_SIZE, "bold"))
         floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold"))
         floating_timer_label.place(x=HOURS_X, y=HOURS_Y)
+    else:
+        canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
+        floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold")) #? IS THIS EVEN WORKING??
+        floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
     if start_timer_checker_2:
         second +1
         start_timer_checker_2 = False
@@ -289,14 +286,14 @@ def crono():
     count_upper = root.after(1000, crono)
 # --------------------------- COUNTDOWN MECHANISM ------------------------------- #
 def start_timer():
-    global start_timer_checker, pause_checker, condition_checker, pomodoro_mode_activate, crono_mode_activate, start_short_break, start_long_break, start_timer_checker_2
+    global start_timer_checker, pause_checker, condition_checker, pomodoro_mode_activate, crono_mode_activate, start_short_break, start_long_break, \
+    start_timer_checker_2, reps
     condition_checker = False
     start_timer_checker_2 = True
     if pomodoro_mode_activate:
         start_timer_checker += 1
         pause_checker = 1
         if start_timer_checker == 1:
-            global reps
             condition_checker = False
             work_sec = WORK_MIN * 60
             short_break_sec = SHORT_BREAK_MIN * 60
@@ -308,7 +305,7 @@ def start_timer():
                 start_long_break = True
                 pause_timer()
                 condition_checker = variable
-                timer_label.config(text="Break", fg=PINK)
+                timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
                 canvas.itemconfig(timer, text=f"20:00")
                 floating_timer_label.config(text="20:00")
                 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
@@ -339,7 +336,7 @@ def start_timer():
                 start_short_break = True
                 pause_timer()
                 condition_checker = variable
-                timer_label.config(text="Break", fg=PINK)
+                timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
                 canvas.itemconfig(timer, text=f"05:00")
                 floating_timer_label.config(text="05:00")
                 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
@@ -355,7 +352,7 @@ def start_timer():
 
 
 def count_down(count):
-    global second, minute, count_downer
+    global second, minute, count_downer, start_timer_checker
     second = count % 60
     minute = math.floor(count / 60)
     second_int = count % 60
@@ -367,11 +364,9 @@ def count_down(count):
     second = second_int
     minute = minute_int
     if count > 0:
-        global count_downer
         # you can change the speed of countdown here
-        count_downer = root.after(1000, count_down, count - 1)
+        count_downer = root.after(1, count_down, count - 1)
     else:
-        global start_timer_checker
         start_timer_checker = 0
         start_timer()
 
@@ -399,12 +394,12 @@ def pause_timer():
                 if start_short_break:
                     start_short_break = False
                     count_down(SHORT_BREAK_MIN * 60 + second)
-                    timer_label.config(text="Break", fg=PINK)
-                    root.after(301000, pause_timer)
+                    timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
+                    root.after(301000, pause_timer) #! PROBLEMATIC
                 elif start_long_break:
                     start_long_break = False
                     count_down(LONG_BREAK_MIN * 60 + second)
-                    timer_label.config(text="Break", fg=PINK)
+                    timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
                     root.after(1201000, pause_timer)
                 else:
                     count_down(minute * 60 + second)
