@@ -5,7 +5,8 @@
 KEGOMODORO is a Pomodoro timer application designed to help you manage your time effectively using the Pomodoro Technique. This application includes a countdown timer, pause and resume functionality, and a floating window feature. It also integrates with Pixela to track and visualize your time management data.
 
 **LIGHT AND RED THEME!**
-![image](https://github.com/user-attachments/assets/60dfebde-ddd3-45ef-8059-bc746707f3f4)
+![image](https://github.com/user-attachments/assets/2e7b17b5-3860-43f2-85a1-c8e13aaa502c)
+
 
 
 ### **Behelit Feature (from *Berserk*)**
