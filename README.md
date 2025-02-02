@@ -1,7 +1,5 @@
 # KEGOMODORO – Customizable Pomodoro & Stopwatch Timer ⏳
 
-## Overview
-
 Welcome to **KEGOMODORO**! A completely open-source Pomodoro and Stopwatch timer designed to improve your time management and make working more fun. Whether you're studying, working, or just need a reliable timer, KEGOMODORO is here to keep you on track. Best of all, it's highly customizable, so you can make it fit your exact needs!
 
 **TOMATO AND BERSERK THEME!**
