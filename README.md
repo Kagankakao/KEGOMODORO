@@ -42,7 +42,6 @@ This project is completely open-source! You can fork it, contribute, and make im
 
 ![image](https://github.com/user-attachments/assets/0b669bc0-d472-4dcd-a5e7-9979df36786a)
 - **Pixela Integration**: Uploads time data to Pixela for **visualization** and **tracking**.
-- Here is mine: https://pixe.la/v1/users/kegan/graphs/graph1.html
 ![image](https://github.com/user-attachments/assets/6eb448b2-4fb5-4b39-9b36-377fc235a731)
 **Example** of mine: https://pixe.la/v1/users/kegan/graphs/graph1.html
 
