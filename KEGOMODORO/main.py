@@ -53,17 +53,19 @@ SAVE_FILE_NAME = f"{TEXTS}/notes.txt" # ! Change this to your desired file name
 FLOATING_WINDOW_CHECKER_PATH = f"{TEXTS}/floating_window_checker.txt"
 TIME_CSV_PATH = f"{TEXTS}/time.csv"
 
+NEW_WORK_SOUND_PATH = f"{AUDIOS}/new_work.mp3"
 WORK_SOUND_PATH = f"{AUDIOS}/work.mp3"
 BREAK_SOUND_PATH = f"{AUDIOS}/short_break.mp3"
 LONG_BREAK_SOUND_PATH = f"{AUDIOS}/long_break.mp3"
 
-APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! THIS IS THE ICON STUFF SO CHANGE THIS
+APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! This is the icon
 FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.png"
-LOGO_IMAGE_PATH = f"{IMAGES}/logo2.png"
-MAIN_IMAGE_PATH = f"{IMAGES}/space_tomato2.png"
+LOGO_IMAGE_PATH = f"{IMAGES}/signature.png"
+MAIN_IMAGE_PATH = f"{IMAGES}/main_image.png"
 
 # Load to audio file
 pygame.mixer.init()
+NEW_WORK_SOUND = pygame.mixer.Sound(NEW_WORK_SOUND_PATH)
 WORK_SOUND = pygame.mixer.Sound(WORK_SOUND_PATH)
 BREAK_SOUND = pygame.mixer.Sound(BREAK_SOUND_PATH)
 LONG_BREAK_SOUND = pygame.mixer.Sound(LONG_BREAK_SOUND_PATH)
@@ -97,10 +99,10 @@ MAIN_MINUTE_FONT_SIZE = 28
 MAIN_HOUR_FONT_SIZE = 20
 FLOATING_MINUTE_FONT_SIZE = 26
 FLOATING_HOUR_FONT_SIZE = 23
-HOURS_X=125
-HOURS_Y=170
-MINUTE_X=160
-MINUTE_Y=168
+HOURS_X=124
+HOURS_Y=199
+MINUTE_X=145
+MINUTE_Y=194
 
 long_break_pause = False
 pause_pomodoro_mode = False
@@ -113,10 +115,9 @@ paused = False
 start_short_break= False
 start_long_break = False
 open_floating_window = False
-start_timer_checker_2 = False # FOR THE FIX FIRST SECOND GLITCH
+start_timer_checker_2 = False 
 # ------------------------------ SOME BOOT-UPS --------------------------------- #
-
-# Creating time.csv
+# Creating time.csv file
 try:
     with open(TIME_CSV_PATH, "r") as file:
         file.read()
@@ -134,8 +135,8 @@ def connect_to_pixela():
         "agreeTermsOfService": "yes",
         "notMinor": "yes"
     }
-    # creates user
-    # response = requests.post(url=PIXELA_ENDPOINT, json=params)
+    # Creates user
+    response = requests.post(url=PIXELA_ENDPOINT, json=params)
 
 
     graphic_endpoint = f"{PIXELA_ENDPOINT}{USERNAME}/graphs"
@@ -149,8 +150,8 @@ def connect_to_pixela():
         "X-USER-TOKEN": TOKEN
     }
 
-    # creates graph
-    # graph_response = requests.post(url=graphic_endpoint, json=graphic_params, headers=headers)
+    # Creates graph
+    graph_response = requests.post(url=graphic_endpoint, json=graphic_params, headers=headers)
     add_pixel_endpoint = f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}"
     pixels_params = {
         "date": DATE,
@@ -163,12 +164,14 @@ def connect_to_pixela():
     update_pixel_params = {
         "quantity": str(hours),
     }
-    # updates pixel quantity
+    # Updates the pixel quantity
     update_pixel_response = requests.put(url=update_pixel_endpoint, json=update_pixel_params, headers=headers)
 
     delete_pixel_endpoint = f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{DATE}"
 
-    # delete_pixel_response = requests.delete(url=delete_pixel_endpoint, headers=headers)
+    # delete_pixel_response = requests.delete(url=delete_pixel_endpoint, headers=headers) 
+
+    # This happens because of the free version of pixela
     if len(pixel_response.text) == 341:
         print("Trying to connect to Pixela again...")
         time.sleep(0.5)
@@ -199,7 +202,7 @@ def crono_mode():
     crono_mode_activate = True
     pomodoro_mode_activate = False
 
-    # get's the time in time file
+    # Gets the time from the time file
     df = pd.read_csv(TIME_CSV_PATH)
     second = df['second'].iloc[-1]
     minute = df['minute'].iloc[-1]
@@ -209,11 +212,11 @@ def crono_mode():
 
     if not show_hours:
         canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
-        floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold")) #! RELATIONAL WITH FLOATING TIMER BUT WHERE IDK
+        floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold")) #? Related to the floating timer
         floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
     if show_hours:
-        canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, MAIN_HOUR_FONT_SIZE, "bold")) #! RELATIONAL WITH MAIN SCREEN'S TIMER
-        floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold")) #! RELATIONAL WITH FLOATING TIMER
+        canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, MAIN_HOUR_FONT_SIZE, "bold")) #? Related to the main screen's timer
+        floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold")) #? Related to the floating timer
         floating_timer_label.place(x=HOURS_X, y=HOURS_Y)
 def floating_window(**kwargs):
     global open_floating_window, checked_state
@@ -250,8 +253,6 @@ def reset():
                 root.after_cancel(count_upper)
             except Exception as e:
                 print(f"Error: {e}")
-
-
         else:
             print("Error: No mode selected")
         timer_label.config(text="TIMER", fg=ORANGE)
@@ -265,7 +266,6 @@ def reset():
         condition_checker = True
         show_hours = False
         pause_pomodoro_mode = False
-        # pause_checker = 0
         pause_button.config(text=f"Pause")
         canvas.itemconfig(timer, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"))
         floating_timer_label.config(text="00:00", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold"))
@@ -333,12 +333,14 @@ def start_timer():
                     timer_label.config(text="Work", fg=BLACK)
                     count_down(work_sec)
                 else:
-                    WORK_SOUND.play()
                     if long_break_pause:
+                        NEW_WORK_SOUND.play()
                         long_break_pause = False
                         check_mark.config(text="")
+                    else:
+                        WORK_SOUND.play()
                     pause_pomodoro() 
-                    temp_work_sec = work_sec # export to pause_timer's global
+                    temp_work_sec = work_sec # Export to pause_timer's global
                 reps += 1
 
             else:
@@ -385,8 +387,8 @@ def count_down(count):
     second = second_int
     minute = minute_int
     if count > 0:
-        # you can change the speed of countdown here
-        count_downer = root.after(1, count_down, count - 1)
+        # You can change the speed of countdown here
+        count_downer = root.after(1000, count_down, count - 1)
     else:
         start_timer_checker = 0
         start_timer()
@@ -397,7 +399,7 @@ def pause_timer():
     long_break_sec, condition_checker, pause_pomodoro_mode, temp_work_sec
     if pomodoro_mode_activate and pause_pomodoro_mode:
         pause_pomodoro_mode = False
-        timer_label.config(text="Work", fg=BLACK) # check floating window too
+        timer_label.config(text="Work", fg=BLACK) 
         pause_button.config(text=f"Pause")
         count_down(temp_work_sec)
     elif pomodoro_mode_activate:
@@ -423,12 +425,10 @@ def pause_timer():
                     start_short_break = False
                     count_down(SHORT_BREAK_MIN * 60 + second)
                     timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
-                    # root.after(301000, pause_timer) #! PROBLEMATIC
                 elif start_long_break:
                     start_long_break = False
                     count_down(LONG_BREAK_MIN * 60 + second)
                     timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
-                    # root.after(1201000, pause_timer)
                 else:
                     count_down(minute * 60 + second)
                     timer_label.config(text="Work", fg=BLACK)
@@ -482,7 +482,7 @@ def save_data():
         if show_hours:
             saved_note = large_askstring("Save your note", "Write your note:")
             if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
-                return
+                pass
             else: 
                 showinfo("Your note:", '{}'.format(saved_note))
             saved_data["date"].append(dt.datetime.now().strftime("%Y-%m-%d"))
@@ -491,13 +491,12 @@ def save_data():
         else:
             saved_note = large_askstring("Save your note", "Write your note:")
             if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
-                return
+                pass
             else: 
                 showinfo("Your note:", '{}'.format(saved_note))
             saved_data["date"].append(dt.datetime.now().strftime("%Y-%m-%d"))
             saved_data["time"].append(f"{minute:02d}:{second:02d}")
             saved_data["notes"].append(saved_note)
-        # when pressing the 'Save' button, it saves the data to a CSV file and for not to do overwrite the file:
         try:
             if note_writer_first_gap == 0:
                 note_writer_first = ""
@@ -508,14 +507,14 @@ def save_data():
                 if not show_hours:
                     file.write(
                         f"{note_writer_first}{dt.datetime.now().strftime("%m/%d/%Y")}\n{minute:02d}:{second:02d} {saved_note}\n")
-                else: # ? 'Save your note', 'Write your note: ")'
+                else: 
                     file.write(
                         f"{note_writer_first}{dt.datetime.now().strftime("%m/%d/%Y")}\n{hours:02d}:{minute:02d}:{second:02d} {saved_note}\n")
         except e:
             print(e)
     else:
         tkinter.messagebox.showerror("Error", "You need to be in stopwatch mode to use save button.")
-    # save this data to a pixela website
+
     try:
         if crono_mode_activate:
             connect_to_pixela()
@@ -549,7 +548,7 @@ root.resizable(False, False)
 ico = Image.open(APP_ICON_PATH) 
 photo = ImageTk.PhotoImage(ico)
 root.wm_iconphoto(False, photo)
-root.geometry("+700+300") #! ADJUSTS THE STARTING LOCATION OF WINDOW
+root.geometry("+700+300") #? Adjusts the starting location of the window
 
 # ---------------------------- LARGE ASKSTRING ------------------------------- #
 class LargeAskStringDialog(simpledialog.Dialog):
@@ -564,7 +563,7 @@ class LargeAskStringDialog(simpledialog.Dialog):
 
 def large_askstring(title, prompt):
     root = tk.Tk()
-    root.withdraw()  # Hide the root window
+    root.withdraw()  # Hides the root window
     dialog = LargeAskStringDialog(root, title=title)
     return dialog.result
 # ---------------------------- FLOATING WINDOW SETUP ------------------------------- #
@@ -572,7 +571,6 @@ class DraggableWindow(Toplevel):
     def __init__(self):
         super().__init__()
         self.title("Draggable Window")
-        # self.geometry("300x300")
         
         # Bind mouse events to the window
         self.bind("<Button-1>", self.on_press)
@@ -585,7 +583,6 @@ class DraggableWindow(Toplevel):
         self.geometry("+250+250")
         self.lift()
         self.wm_attributes("-topmost", True)
-        # self.wm_attributes("-disabled", True)
         self.wm_attributes("-transparentcolor", "white")
         label.pack()
 
@@ -623,21 +620,21 @@ floating_timer_label = Label(window, text="00:00", font=(FONT_NAME, FLOATING_MIN
 floating_timer_label.pack()
 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
 
-# Kegan Software
+# KEGAN Software signature
 logo = Canvas(width=600, height=224, bg=DARK_RED, highlightthickness=0)
 logo_img = PhotoImage(file=LOGO_IMAGE_PATH)
 logo.create_image(300, 112, image=logo_img)
 logo.grid(column=1, row=0)
 logo.place(x=-300, y=230)
 
-# Tomato
+# Main image
 canvas = Canvas(width=200, height=240, bg=DARK_RED, highlightthickness=0)
 tomato_img = PhotoImage(file=MAIN_IMAGE_PATH)
 canvas.create_image(100, 120, image=tomato_img) #? IT'S CENTER THE IMAGE
 timer = canvas.create_text(100, 130, text="00:00", font=(FONT_NAME, MAIN_MINUTE_FONT_SIZE, "bold"), fill="white")
 canvas.grid(column=1, row=1)
 
-# labels
+# Labels
 timer_label = Label(text="TIMER", font=(FONT_NAME, 40, "bold"), bg=DARK_RED, fg=ORANGE)
 timer_label.grid(column=1, row=0)
 
@@ -649,7 +646,7 @@ check_mark = Label(font=(FONT_NAME, 15, "bold"), bg=DARK_RED, fg=ORANGE)
 check_mark.grid(column=1, row=3)
 check_mark.place(x=120, y=300)
 
-# buttons
+# Buttons
 start_button = Button(text="Start", command=start_timer, highlightthickness=0, 
                       background=BUTTON_BACKGROUND_COLOR, foreground=BUTTON_FOREGROUND_COLOR,
                       activebackground=BUTTON_BACKGROUND_COLOR, activeforeground=BUTTON_FOREGROUND_COLOR)
@@ -680,7 +677,7 @@ checkbutton = Checkbutton(text="SmallWindow", variable=checked_state, command=fl
                            activebackground=RADIO_BACKGROUND_COLOR, activeforeground=RADIO_FOREGROUND_COLOR)
 checkbutton.place(x=200, y=20)
 
-# radio buttons
+# Radio buttons
 radio_state = IntVar()
 radiobutton1 = Radiobutton(text="Pomodoro", value=1, variable=radio_state, command=pomodoro_mode,
                            highlightthickness=0, 
@@ -692,9 +689,6 @@ radiobutton2 = Radiobutton(text="Stopwatch", value=2, variable=radio_state, comm
                            activebackground=RADIO_BACKGROUND_COLOR, activeforeground=RADIO_FOREGROUND_COLOR)
 radiobutton1.place(x=200, y=-20) 
 radiobutton2.place(x=200, y=-0)
-
-# switch_button = Button(root, text="DARK", bg=SWITCH_BUTTON_DARK_BG_COLOR, fg=SWITCH_BUTTON_DARK_FG_COLOR, width=5, height=1, command=toggle)
-# switch_button.place(x=226, y=40)
 
 # Floating timer will remeber the mode
 window.withdraw()
