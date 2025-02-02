@@ -23,7 +23,7 @@ KEGOMODORO is a Pomodoro timer application designed to help you manage your time
 ![368684829-96e1a41d-dc5d-40f3-a429-2cf6b6a2a41d](https://github.com/user-attachments/assets/f0dba28e-92f4-4bfa-80c6-5e5dbfab07fa)
 - **Take Notes**: Take notes and save your work **automatically**.
 
-![image](https://github.com/user-attachments/assets/0d16e654-c04e-4a1a-87b2-845b87be7f40)
+![image](https://github.com/user-attachments/assets/5793db64-fa98-4971-a193-4ffd78c406c2)
 - **Example**: **Automatically** saved notes:
 
 ![image](https://github.com/user-attachments/assets/0b669bc0-d472-4dcd-a5e7-9979df36786a)
