@@ -1,6 +1,6 @@
 The app originally looked like the provided images, but I later updated the themes. You can now customize them and adjust the colors accordingly.
 
-Here are the old theme color hex values:
+Here are the old theme colors hex values:
 
 PINK: #e2979c
 RED: #e7305b
