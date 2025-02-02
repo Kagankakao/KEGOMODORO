@@ -1,8 +1,8 @@
-# KEGOMODORO - Pomodoro Timer Application
+# KEGOMODORO – Customizable Pomodoro & Stopwatch Timer ⏳
 
 ## Overview
 
-KEGOMODORO is a Pomodoro timer application designed to help you manage your time effectively using the Pomodoro Technique. This application includes a countdown timer, pause and resume functionality, and a floating window feature. It also integrates with Pixela to track and visualize your time management data.
+Welcome to **KEGOMODORO**! A completely open-source Pomodoro and Stopwatch timer designed to improve your time management and make working more fun. Whether you're studying, working, or just need a reliable timer, KEGOMODORO is here to keep you on track. Best of all, it's highly customizable, so you can make it fit your exact needs!
 
 **TOMATO AND BERSERK THEME!**
 ![image](https://github.com/user-attachments/assets/ee38a43d-438e-4d9c-8320-29097d6b5b5f)
@@ -13,12 +13,28 @@ KEGOMODORO is a Pomodoro timer application designed to help you manage your time
 ### **Behelit Feature (from *Berserk*)**
 - For fans of *Berserk*, a Behelit feature has been added to the cronometer. When activated, it serves as a special timer with a visual reference to the Behelit, adding a touch of *Berserk* magic to your experience!
 
-## Features
+## 💡 Key Features
 
-- **Pomodoro Mode**: Track work and break periods using the **Pomodoro Technique**.
-- **Stopwatch Mode**: Use the **timer** as a simple stopwatch.
-- **Pause and Resume**: Pause and resume your timer **easily**.
-- **Floating Timer**: Keep a floating window timer on top of **other applications**.
+- **Pomodoro & Stopwatch Mode**: Toggle between Pomodoro and Stopwatch timers easily.
+- **Always on Top**: Keep your timer visible with the "Always on Top" feature.
+- **Quick Notes & Session Logging**: Record your notes and working hours in a jiffy.
+- **Work Hours Graph**: Visualize your productivity with a graph of your work hours 📊.
+- **Behelit Mode (Berserk Theme)**: For fans of Berserk, a Behelit-inspired timer with a dark twist!
+- **Lightweight & Simple**: Developed in Python with no unnecessary dependencies.
+
+## 🎨 Custom Themes & Personalization
+
+KEGOMODORO is all about **customization**. Easily create your own themes, change colors, and adjust the look of your timer. The goal is to make time management not only effective but visually appealing too.
+
+The image below shows just a few of the many customizable options you can apply.
+
+## 🐍 Built with Python
+
+KEGOMODORO is developed in **Python**, making it easy to modify, extend, and understand. Whether you’re a beginner or an expert, the code is simple to follow, and the project is perfect for learning how to build your own timers.
+
+## 💻 Fully Open Source
+
+This project is completely open-source! You can fork it, contribute, and make improvements or adapt it for your own use. Let’s make time management even better, together!
 
 ![368684829-96e1a41d-dc5d-40f3-a429-2cf6b6a2a41d](https://github.com/user-attachments/assets/f0dba28e-92f4-4bfa-80c6-5e5dbfab07fa)
 - **Take Notes**: Take notes and save your work **automatically**.
