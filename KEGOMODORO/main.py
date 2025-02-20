@@ -388,7 +388,7 @@ def count_down(count):
     minute = minute_int
     if count > 0:
         # You can change the speed of countdown here
-        count_downer = root.after(1, count_down, count - 1)
+        count_downer = root.after(1000, count_down, count - 1)
     else:
         start_timer_checker = 0
         start_timer()
