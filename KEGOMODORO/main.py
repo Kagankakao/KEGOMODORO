@@ -40,9 +40,9 @@ SWITCH_BUTTON_LIGHT_BG_COLOR = WHITE
 SWITCH_BUTTON_LIGHT_FG_COLOR = BLACK
 # ---------------------------- PIXELA CONFIGS ------------------------------- #
 PIXELA_ENDPOINT = "https://pixe.la/v1/users" 
-USERNAME = "" #! FILL HERE
-TOKEN = "" #! FILL HERE
-GRAPH_ID = "" #! FILL HERE
+USERNAME = ""
+TOKEN = ""
+GRAPH_ID = ""
 
 DEPENDENCIES = Path("dependencies/")
 IMAGES = f"{DEPENDENCIES}/images"
@@ -83,8 +83,8 @@ saved_data = {
 }
 
 # ----------------------------- TIMER CONFIGS ------------------------------- #
-WORK_MIN = 25
-SHORT_BREAK_MIN = 5
+WORK_MIN = 120
+SHORT_BREAK_MIN = 10
 LONG_BREAK_MIN = 20
 reps = 1
 resume = 0
@@ -187,8 +187,8 @@ def pomodoro_mode():
     reset_pass = False
     crono_mode_activate = False
     pomodoro_mode_activate = True
-    canvas.itemconfig(timer, text=f"25:00")
-    floating_timer_label.config(text="25:00")
+    canvas.itemconfig(timer, text=f"{WORK_MIN:02d}:00")
+    floating_timer_label.config(text=f"{WORK_MIN:02d}:00")
 
 
 def crono_mode():
@@ -319,8 +319,8 @@ def start_timer():
                 pause_timer()
                 condition_checker = temp
                 timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
-                canvas.itemconfig(timer, text=f"20:00")
-                floating_timer_label.config(text="20:00")
+                canvas.itemconfig(timer, text=f"{LONG_BREAK_MIN:02d}:00")
+                floating_timer_label.config(text=f"{LONG_BREAK_MIN:02d}:00")
                 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
                 condition_checker = temp
                 check_mark.config(text="✔✔✔✔")
@@ -360,8 +360,8 @@ def start_timer():
                 pause_timer()
                 condition_checker = temp
                 timer_label.config(text="Break", fg=DEEP_GOLD_COLOR)
-                canvas.itemconfig(timer, text=f"05:00")
-                floating_timer_label.config(text="05:00")
+                canvas.itemconfig(timer, text=f"{SHORT_BREAK_MIN:02d}:00")
+                floating_timer_label.config(text=f"{SHORT_BREAK_MIN:02d}:00")
                 floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
                 reps += 1
     elif crono_mode_activate:
@@ -466,8 +466,8 @@ def pause_pomodoro():
     global pause_pomodoro_mode
     pause_pomodoro_mode = not pause_pomodoro_mode
     timer_label.config(text=f"Work", fg=BLACK)
-    canvas.itemconfig(timer, text=f"25:00")
-    floating_timer_label.config(text="25:00")
+    canvas.itemconfig(timer, text=f"{WORK_MIN:02d}:00")
+    floating_timer_label.config(text=f"{WORK_MIN:02d}:00")
     pause_button.config(text=f"Resume")
 
 def save_data():
