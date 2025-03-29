@@ -83,7 +83,7 @@ saved_data = {
 }
 
 # ----------------------------- TIMER CONFIGS ------------------------------- #
-WORK_MIN = 120
+WORK_MIN = 25
 SHORT_BREAK_MIN = 10
 LONG_BREAK_MIN = 20
 reps = 1
