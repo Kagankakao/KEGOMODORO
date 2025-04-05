@@ -8,6 +8,7 @@ import requests
 import datetime
 import time
 import pygame
+import threading
 from tkinter import *
 import tkinter as tk
 from tkinter import simpledialog
@@ -175,7 +176,7 @@ def connect_to_pixela():
     if len(pixel_response.text) == 341:
         print("Trying to connect to Pixela again...")
         time.sleep(0.5)
-        connect_to_pixela()
+        start_multithread(connect_to_pixela)
 # ----------------------------MODS---------------------------- #
 def pomodoro_mode():
     global pomodoro_mode_activate, crono_mode_activate, hours, minute, second, reset_pass
@@ -517,13 +518,17 @@ def save_data():
 
     try:
         if crono_mode_activate:
-            connect_to_pixela()
+            start_multithread(connect_to_pixela)
     except requests.exceptions.ConnectionError:
         print("Connection Error: Unable to connect to Pixela.")
         time.sleep(1)
-        connect_to_pixela()
+        start_multithread(connect_to_pixela)
     except Exception as e:
         print(f"An error occurred: {e}")
+
+def start_multithread(function):
+    thread = threading.Thread(target=function)
+    thread.start()
 
 def center_window(window):
     window.update_idletasks()
