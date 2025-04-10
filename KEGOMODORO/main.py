@@ -59,7 +59,7 @@ WORK_SOUND_PATH = f"{AUDIOS}/work.mp3"
 BREAK_SOUND_PATH = f"{AUDIOS}/short_break.mp3"
 LONG_BREAK_SOUND_PATH = f"{AUDIOS}/long_break.mp3"
 
-APP_ICON_PATH = f"{IMAGES}/behelit.png" # ! This is the icon
+APP_ICON_PATH = f"{IMAGES}/icon.ico" 
 FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.png"
 LOGO_IMAGE_PATH = f"{IMAGES}/signature.png"
 MAIN_IMAGE_PATH = f"{IMAGES}/main_image.png"
@@ -85,7 +85,7 @@ saved_data = {
 
 # ----------------------------- TIMER CONFIGS ------------------------------- #
 WORK_MIN = 25
-SHORT_BREAK_MIN = 10
+SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 reps = 1
 resume = 0
