@@ -1,4 +1,5 @@
 import os
+import subprocess
 import csv
 import tkinter.messagebox
 import math
@@ -40,19 +41,21 @@ SWITCH_BUTTON_DARK_FG_COLOR = WHITE
 SWITCH_BUTTON_LIGHT_BG_COLOR = WHITE
 SWITCH_BUTTON_LIGHT_FG_COLOR = BLACK
 # ---------------------------- PIXELA CONFIGS ------------------------------- #
-PIXELA_ENDPOINT = "https://pixe.la/v1/users" 
-USERNAME = ""
-TOKEN = ""
-GRAPH_ID = ""
+PIXELA_ENDPOINT = "https://pixe.la/v1/users"
+USERNAME = "kegan"
+TOKEN = "afhus8hj2phfb29nn821r"
+GRAPH_ID = "graph1"
 
 DEPENDENCIES = Path("dependencies/")
 IMAGES = f"{DEPENDENCIES}/images"
 AUDIOS = f"{DEPENDENCIES}/audios"
 TEXTS = f"{DEPENDENCIES}/texts"
+CONFIGURATION = f"{TEXTS}/Configurations"
 
-SAVE_FILE_NAME = f"{TEXTS}/notes.txt" # ! Change this to your desired file name
-FLOATING_WINDOW_CHECKER_PATH = f"{TEXTS}/floating_window_checker.txt"
-TIME_CSV_PATH = f"{TEXTS}/time.csv"
+SAVE_FILE_NAME = f"{TEXTS}/KAÆ[Æß#.txt" # ! Change this to your desired file name
+FLOATING_WINDOW_CHECKER_PATH = f"{CONFIGURATION}/floating_window_checker.txt"
+TIME_CSV_PATH = f"{CONFIGURATION}/time.csv"
+CONFIGURATION_PATH = f"{CONFIGURATION}/configuration.csv"
 
 NEW_WORK_SOUND_PATH = f"{AUDIOS}/new_work.mp3"
 WORK_SOUND_PATH = f"{AUDIOS}/work.mp3"
@@ -82,11 +85,41 @@ saved_data = {
     "time": [],
     "notes": []
 }
-
+# ------------------------------ SOME BOOT-UPS --------------------------------- #
+# Creating time.csv and configuration.csv files if they don't exist
+try:
+    with open(TIME_CSV_PATH, "r") as file:
+        file.read()
+except:
+    with open(TIME_CSV_PATH, "w") as file:
+        file.write("hours,minute,second\n0,0,0\n")
+        
+try:
+    with open(CONFIGURATION_PATH, "r") as file:
+        file.read()
+except:
+    with open(CONFIGURATION_PATH, "w", newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["WORK_MIN", "SHORT_BREAK_MIN", "LONG_BREAK_MIN", "NOTEPAD_MODE"])
+        writer.writerow([25, 5, 20, FALSE])
+        print("afrojack")
 # ----------------------------- TIMER CONFIGS ------------------------------- #
-WORK_MIN = 25
-SHORT_BREAK_MIN = 5
-LONG_BREAK_MIN = 20
+try:
+    with open(CONFIGURATION_PATH, "r", newline='') as file:
+        reader = csv.DictReader(file)
+        config = next(reader) 
+        WORK_MIN = int(config["WORK_MIN"])
+        SHORT_BREAK_MIN = int(config["SHORT_BREAK_MIN"])
+        LONG_BREAK_MIN = int(config["LONG_BREAK_MIN"])
+        NOTEPAD_MODE = int(config["NOTEPAD_MODE"].lower() in ["true", "1", "yes", "correct"])
+except Exception as e:
+    # Fallback to defaults if reading fails
+    WORK_MIN = 25
+    SHORT_BREAK_MIN = 5
+    LONG_BREAK_MIN = 20
+    NOTEPAD_MODE = False
+    print(f"Could not load configuration, using defaults: {e}")
+
 reps = 1
 resume = 0
 start_timer_checker = 0
@@ -95,7 +128,7 @@ minute = 0
 hours = 0
 count_downer = 0
 count_upper = 0
-note_writer_first_gap = 0
+note_writer_first_gap = 1
 MAIN_MINUTE_FONT_SIZE = 28
 MAIN_HOUR_FONT_SIZE = 20
 FLOATING_MINUTE_FONT_SIZE = 26
@@ -117,15 +150,6 @@ start_short_break= False
 start_long_break = False
 open_floating_window = False
 start_timer_checker_2 = False 
-# ------------------------------ SOME BOOT-UPS --------------------------------- #
-# Creating time.csv file
-try:
-    with open(TIME_CSV_PATH, "r") as file:
-        file.read()
-except:
-    with open(TIME_CSV_PATH, "w") as file:
-        file.write("hours,minute,second\n0,0,0\n")
-
 # -------------------------- CONECTION WITH PIXELA ------------------------------- #
 def connect_to_pixela():
     global hours
@@ -471,8 +495,14 @@ def pause_pomodoro():
     floating_timer_label.config(text=f"{WORK_MIN:02d}:00")
     pause_button.config(text=f"Resume")
 
+# To see save data in note editor
+def open_in_notepad(filepath: str = SAVE_FILE_NAME):
+    relative_path = os.path.relpath(filepath)
+    subprocess.Popen(['notepad.exe', relative_path])
+
 def save_data():
     global hours, minute, second, crono_mode_activate, show_hours, saved_data, crono_reset, paused, note_writer_first_gap
+    saved_note = ""
     if not paused:
         pause_timer()
     if crono_mode_activate:
@@ -481,36 +511,40 @@ def save_data():
             file.write(f"{hours},{minute},{second}\n")
 
         if show_hours:
-            saved_note = large_askstring("Save your note", "Write your note:")
-            if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
-                pass
-            else: 
-                showinfo("Your note:", '{}'.format(saved_note))
-            saved_data["date"].append(dt.datetime.now().strftime("%Y-%m-%d"))
-            saved_data["time"].append(f"{hours:02d}:{minute:02d}:{second:02d}")
-            saved_data["notes"].append(saved_note)
+            if not NOTEPAD_MODE:
+                print(f"young jesus perspective {NOTEPAD_MODE}")
+                saved_note = large_askstring("Save your note", "Write your note:")
+                if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
+                    pass
+                else: 
+                    showinfo("Your note:", '{}'.format(saved_note))
         else:
-            saved_note = large_askstring("Save your note", "Write your note:")
-            if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
-                pass
-            else: 
-                showinfo("Your note:", '{}'.format(saved_note))
-            saved_data["date"].append(dt.datetime.now().strftime("%Y-%m-%d"))
-            saved_data["time"].append(f"{minute:02d}:{second:02d}")
-            saved_data["notes"].append(saved_note)
+            if not NOTEPAD_MODE:
+                print(f"young jesus perspective {NOTEPAD_MODE}")
+                saved_note = large_askstring("Save your note", "Write your note:")
+                if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
+                    pass
+                else: 
+                    showinfo("Your note:", '{}'.format(saved_note))
         try:
             if note_writer_first_gap == 0:
-                note_writer_first = ""
-            else:
                 note_writer_first = "\n"
+            else:
+                note_writer_first = "\n\n"
             note_writer_first_gap = None
             with open(SAVE_FILE_NAME, 'a', encoding='utf-8') as file:
                 if not show_hours:
                     file.write(
-                        f"{note_writer_first}{dt.datetime.now().strftime("%m/%d/%Y")}\n{minute:02d}:{second:02d} {saved_note}\n")
+                        f"{note_writer_first}{dt.datetime.now().strftime('%m/%d/%Y')}\n{minute:02d}:{second:02d}")
+                    if saved_note:
+                        file.write(f" {saved_note}")
                 else: 
                     file.write(
-                        f"{note_writer_first}{dt.datetime.now().strftime("%m/%d/%Y")}\n{hours:02d}:{minute:02d}:{second:02d} {saved_note}\n")
+                        f"{note_writer_first}{dt.datetime.now().strftime('%m/%d/%Y')}\n{hours:02d}:{minute:02d}:{second:02d}")
+                    if saved_note:
+                        file.write(f" {saved_note}")
+            time.sleep(0.03)
+            open_in_notepad(SAVE_FILE_NAME)
         except e:
             print(e)
     else:
