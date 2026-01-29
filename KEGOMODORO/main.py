@@ -92,7 +92,7 @@ try:
         file.read()
 except:
     with open(TIME_CSV_PATH, "w") as file:
-        file.write("hours,minute,second\n0,0,0\n")
+        file.write("\nhours,minute,second\n0,0,0\n")
         
 try:
     with open(CONFIGURATION_PATH, "r") as file:
@@ -102,7 +102,6 @@ except:
         writer = csv.writer(file)
         writer.writerow(["WORK_MIN", "SHORT_BREAK_MIN", "LONG_BREAK_MIN", "NOTEPAD_MODE"])
         writer.writerow([25, 5, 20, FALSE])
-        print("afrojack")
 # ----------------------------- TIMER CONFIGS ------------------------------- #
 try:
     with open(CONFIGURATION_PATH, "r", newline='') as file:
@@ -512,7 +511,7 @@ def save_data():
 
         if show_hours:
             if not NOTEPAD_MODE:
-                print(f"young jesus perspective {NOTEPAD_MODE}")
+                print(f"{NOTEPAD_MODE}")
                 saved_note = large_askstring("Save your note", "Write your note:")
                 if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
                     pass
@@ -520,7 +519,7 @@ def save_data():
                     showinfo("Your note:", '{}'.format(saved_note))
         else:
             if not NOTEPAD_MODE:
-                print(f"young jesus perspective {NOTEPAD_MODE}")
+                print(f"{NOTEPAD_MODE}")
                 saved_note = large_askstring("Save your note", "Write your note:")
                 if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
                     pass
@@ -535,12 +534,12 @@ def save_data():
             with open(SAVE_FILE_NAME, 'a', encoding='utf-8') as file:
                 if not show_hours:
                     file.write(
-                        f"{note_writer_first}{dt.datetime.now().strftime('%m/%d/%Y')}\n{minute:02d}:{second:02d}")
+                        f"{note_writer_first}{dt.datetime.now().strftime('%d/%m/%Y')}\n{minute:02d}:{second:02d}")
                     if saved_note:
                         file.write(f" {saved_note}")
                 else: 
                     file.write(
-                        f"{note_writer_first}{dt.datetime.now().strftime('%m/%d/%Y')}\n{hours:02d}:{minute:02d}:{second:02d}")
+                        f"{note_writer_first}{dt.datetime.now().strftime('%d/%m/%Y')}\n{hours:02d}:{minute:02d}:{second:02d}")
                     if saved_note:
                         file.write(f" {saved_note}")
             time.sleep(0.03)
