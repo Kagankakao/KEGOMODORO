@@ -61,6 +61,57 @@ def get_persistent_path(relative_path):
     """ Get path for persistent files (config, logs) """
     return str(get_persistent_root() / relative_path)
 
+def get_app_dir():
+    if getattr(sys, 'frozen', False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+def load_env_file(env_path):
+    loaded = False
+    if not env_path.exists():
+        return loaded
+
+    with open(env_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip()
+            if not key:
+                continue
+
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in ["'", '"']:
+                value = value[1:-1]
+
+            os.environ.setdefault(key, value)
+            loaded = True
+
+    return loaded
+
+def load_runtime_env():
+    loaded_paths = []
+    candidate_paths = [
+        get_app_dir() / ".env",
+        get_persistent_root() / ".env",
+    ]
+
+    seen = set()
+    for env_path in candidate_paths:
+        env_path = env_path.resolve()
+        if env_path in seen:
+            continue
+        seen.add(env_path)
+
+        if load_env_file(env_path):
+            loaded_paths.append(env_path)
+
+    return loaded_paths
+
+LOADED_ENV_FILES = load_runtime_env()
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 BLACK = "#000000"
 WHITE = "#feffff"
@@ -81,10 +132,13 @@ SWITCH_BUTTON_DARK_FG_COLOR = WHITE
 SWITCH_BUTTON_LIGHT_BG_COLOR = WHITE
 SWITCH_BUTTON_LIGHT_FG_COLOR = BLACK
 # ---------------------------- PIXELA CONFIGS ------------------------------- #
-PIXELA_ENDPOINT = "https://pixe.la/v1/users"
-USERNAME = "kegan"
-TOKEN = "afhus8hj2phfb29nn821r"
-GRAPH_ID = "graph1"
+PIXELA_ENDPOINT = os.getenv("PIXELA_ENDPOINT", "https://pixe.la/v1/users").strip()
+PIXELA_USERNAME = os.getenv("PIXELA_USERNAME", "").strip()
+PIXELA_TOKEN = os.getenv("PIXELA_TOKEN", "").strip()
+PIXELA_GRAPH_ID = os.getenv("PIXELA_GRAPH_ID", "").strip()
+
+def pixela_is_configured():
+    return all([PIXELA_USERNAME, PIXELA_TOKEN, PIXELA_GRAPH_ID])
 
 DEPENDENCIES = Path(get_resource_path("dependencies/"))
 IMAGES = DEPENDENCIES / "images"
@@ -222,10 +276,13 @@ start_timer_checker_2 = False
 # -------------------------- CONECTION WITH PIXELA ------------------------------- #
 def connect_to_pixela():
     global hours
+    if not pixela_is_configured():
+        return
+
     params = {
         "color": "momiji",
-        "token": TOKEN,
-        "username": USERNAME,
+        "token": PIXELA_TOKEN,
+        "username": PIXELA_USERNAME,
         "agreeTermsOfService": "yes",
         "notMinor": "yes"
     }
@@ -233,20 +290,20 @@ def connect_to_pixela():
     response = requests.post(url=PIXELA_ENDPOINT, json=params)
 
 
-    graphic_endpoint = f"{PIXELA_ENDPOINT}{USERNAME}/graphs"
+    graphic_endpoint = f"{PIXELA_ENDPOINT}{PIXELA_USERNAME}/graphs"
     graphic_params = {
-        "id": GRAPH_ID,
-        "name": USERNAME,
+        "id": PIXELA_GRAPH_ID,
+        "name": PIXELA_USERNAME,
         "unit": "hours",
         "type": "float",
     }
     headers = {
-        "X-USER-TOKEN": TOKEN
+        "X-USER-TOKEN": PIXELA_TOKEN
     }
 
     # Creates graph
     graph_response = requests.post(url=graphic_endpoint, json=graphic_params, headers=headers)
-    add_pixel_endpoint = f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}"
+    add_pixel_endpoint = f"{PIXELA_ENDPOINT}/{PIXELA_USERNAME}/graphs/{PIXELA_GRAPH_ID}"
     pixels_params = {
         "date": DATE,
         "quantity": str(hours),
@@ -254,14 +311,14 @@ def connect_to_pixela():
     pixel_response = requests.post(url=add_pixel_endpoint, json=pixels_params, headers=headers)
     print(pixel_response.text)
     print(len(pixel_response.text))
-    update_pixel_endpoint = f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{DATE}"
+    update_pixel_endpoint = f"{PIXELA_ENDPOINT}/{PIXELA_USERNAME}/graphs/{PIXELA_GRAPH_ID}/{DATE}"
     update_pixel_params = {
         "quantity": str(hours),
     }
     # Updates the pixel quantity
     update_pixel_response = requests.put(url=update_pixel_endpoint, json=update_pixel_params, headers=headers)
 
-    delete_pixel_endpoint = f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{DATE}"
+    delete_pixel_endpoint = f"{PIXELA_ENDPOINT}/{PIXELA_USERNAME}/graphs/{PIXELA_GRAPH_ID}/{DATE}"
 
     # delete_pixel_response = requests.delete(url=delete_pixel_endpoint, headers=headers) 
 
@@ -625,12 +682,13 @@ def save_data():
         tkinter.messagebox.showerror("Error", "You need to be in stopwatch mode to use save button.")
 
     try:
-        if crono_mode_activate:
+        if crono_mode_activate and pixela_is_configured():
             start_multithread(connect_to_pixela)
     except requests.exceptions.ConnectionError:
         print("Connection Error: Unable to connect to Pixela.")
         time.sleep(1)
-        start_multithread(connect_to_pixela)
+        if pixela_is_configured():
+            start_multithread(connect_to_pixela)
     except Exception as e:
         print(f"An error occurred: {e}")
 
