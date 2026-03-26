@@ -4,7 +4,6 @@ import subprocess
 import csv
 import tkinter.messagebox
 import math
-import pandas as pd
 import datetime as dt
 import requests
 import datetime
@@ -207,13 +206,32 @@ saved_data = {
     "notes": []
 }
 # ------------------------------ SOME BOOT-UPS --------------------------------- #
+def write_time_snapshot(current_hours, current_minute, current_second):
+    with open(TIME_CSV_PATH, "w", newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["hours", "minute", "second"])
+        writer.writerow([current_hours, current_minute, current_second])
+
+def load_time_snapshot():
+    try:
+        with open(TIME_CSV_PATH, "r", newline='') as file:
+            reader = csv.DictReader(file)
+            row = next(reader, None)
+
+        if not row:
+            return 0, 0, 0
+
+        return (
+            int(row.get("hours", 0) or 0),
+            int(row.get("minute", 0) or 0),
+            int(row.get("second", 0) or 0),
+        )
+    except Exception:
+        return 0, 0, 0
+
 # Creating time.csv and configuration.csv files if they don't exist
-try:
-    with open(TIME_CSV_PATH, "r") as file:
-        file.read()
-except:
-    with open(TIME_CSV_PATH, "w") as file:
-        file.write("\nhours,minute,second\n0,0,0\n")
+if not TIME_CSV_PATH.exists():
+    write_time_snapshot(0, 0, 0)
 
 WORK_MIN = 25
 SHORT_BREAK_MIN = 5
@@ -251,7 +269,6 @@ minute = 0
 hours = 0
 count_downer = 0
 count_upper = 0
-note_writer_first_gap = 1
 MAIN_MINUTE_FONT_SIZE = 28
 MAIN_HOUR_FONT_SIZE = 20
 FLOATING_MINUTE_FONT_SIZE = 26
@@ -331,8 +348,7 @@ def connect_to_pixela():
 def pomodoro_mode():
     global pomodoro_mode_activate, crono_mode_activate, hours, minute, second, reset_pass
     if crono_mode_activate:
-        with open(TIME_CSV_PATH, mode='a') as file:
-            file.write(f"{hours},{minute},{second}\n")
+        write_time_snapshot(hours, minute, second)
     reset_pass = True
     reset()
     reset_pass = False
@@ -343,31 +359,31 @@ def pomodoro_mode():
 
 
 def crono_mode():
-    global crono_mode_activate, pomodoro_mode_activate, second, minute, hours, show_hours, crono_reset,reset_pass
+    global crono_mode_activate, pomodoro_mode_activate, second, minute, hours, show_hours, crono_reset, reset_pass
     if crono_mode_activate:
-        with open(TIME_CSV_PATH, mode='a') as file:
-            file.write(f"{hours},{minute},{second}\n")
+        write_time_snapshot(hours, minute, second)
+
+    saved_hours, saved_minute, saved_second = load_time_snapshot()
+
     reset_pass = True
     reset()
     reset_pass = False
     crono_mode_activate = True
     pomodoro_mode_activate = False
 
-    # Gets the time from the time file
-    df = pd.read_csv(TIME_CSV_PATH)
-    second = df['second'].iloc[-1]
-    minute = df['minute'].iloc[-1]
-    hours = df['hours'].iloc[-1]
+    second = saved_second
+    minute = saved_minute
+    hours = saved_hours
     if int(hours) != 0:
         show_hours = True
 
     if not show_hours:
         canvas.itemconfig(timer, text=f"{minute:02d}:{second:02d}")
-        floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold")) #? Related to the floating timer
+        floating_timer_label.config(text=f"{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_MINUTE_FONT_SIZE, "bold"))
         floating_timer_label.place(x=MINUTE_X, y=MINUTE_Y)
     if show_hours:
-        canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, MAIN_HOUR_FONT_SIZE, "bold")) #? Related to the main screen's timer
-        floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold")) #? Related to the floating timer
+        canvas.itemconfig(timer, text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, MAIN_HOUR_FONT_SIZE, "bold"))
+        floating_timer_label.config(text=f"{hours:02d}:{minute:02d}:{second:02d}", font=(FONT_NAME, FLOATING_HOUR_FONT_SIZE, "bold"))
         floating_timer_label.place(x=HOURS_X, y=HOURS_Y)
 def floating_window(**kwargs):
     global open_floating_window, checked_state
@@ -632,24 +648,71 @@ def build_saved_time_text():
         return f"{hours:02d}:{minute:02d}:{second:02d}"
     return f"{minute:02d}:{second:02d}"
 
-def append_saved_entry(saved_note=""):
-    global note_writer_first_gap
-    note_file_path = get_note_file_path()
-    if note_writer_first_gap == 0:
-        note_writer_first = "\n"
-    else:
-        note_writer_first = "\n\n"
-    note_writer_first_gap = None
+def parse_saved_date(line):
+    stripped_line = str(line or "").strip()
+    for date_format in ("%m/%d/%Y", "%m.%d.%Y", "%d/%m/%Y", "%d.%m.%Y"):
+        try:
+            return dt.datetime.strptime(stripped_line, date_format).date()
+        except ValueError:
+            continue
+    return None
 
-    with open(note_file_path, 'a', encoding='utf-8') as file:
-        file.write(f"{note_writer_first}{dt.datetime.now().strftime('%d/%m/%Y')}\n{build_saved_time_text()}")
+def append_saved_entry(saved_note=""):
+    note_file_path = get_note_file_path()
+    today = dt.datetime.now().date()
+    today_date_slash = dt.datetime.now().strftime("%m/%d/%Y")
+    time_str = build_saved_time_text()
+
+    existing_content = ""
+    if note_file_path.exists():
+        existing_content = note_file_path.read_text(encoding="utf-8")
+
+    lines = existing_content.split('\n') if existing_content else []
+    today_index = -1
+    for i, line in enumerate(lines):
+        if parse_saved_date(line) == today:
+            today_index = i
+            break
+
+    if today_index >= 0 and today_index + 1 < len(lines):
+        existing_time_line = lines[today_index + 1]
+        existing_notes = ""
+        space_idx = existing_time_line.find(" ")
+        if space_idx > 0:
+            existing_notes = existing_time_line[space_idx + 1:].strip()
+
+        new_time_line = time_str
+        if existing_notes:
+            new_time_line += " " + existing_notes
+
+        lines[today_index + 1] = new_time_line
+
+        entry_end_index = today_index + 2
+        while entry_end_index < len(lines):
+            if parse_saved_date(lines[entry_end_index]) is not None:
+                break
+            entry_end_index += 1
+
+        has_inline_note = " " in new_time_line
+        has_notes_below = entry_end_index > today_index + 2
+
         if saved_note:
-            file.write(f" {saved_note}")
-        if NOTEPAD_MODE:
-            file.write("\n")
+            if not has_inline_note and not has_notes_below:
+                lines[today_index + 1] = new_time_line + " " + saved_note
+            else:
+                lines.insert(entry_end_index, "")
+                lines.insert(entry_end_index + 1, saved_note)
+
+        note_file_path.write_text('\n'.join(lines), encoding='utf-8')
+    else:
+        with open(note_file_path, "a", encoding="utf-8") as file:
+            if existing_content.strip():
+                file.write("\n\n")
+            file.write(f"{today_date_slash}\n{time_str}")
+            if saved_note:
+                file.write(f" {saved_note}")
 
     return note_file_path
-
 # To see save data in note editor
 def open_in_notepad(filepath: str = SAVE_FILE_NAME):
     absolute_path = str(Path(filepath).resolve())
@@ -662,8 +725,7 @@ def save_data():
         pause_timer()
     if crono_mode_activate:
         crono_reset = False
-        with open(TIME_CSV_PATH, mode='a') as file:
-            file.write(f"{hours},{minute},{second}\n")
+        write_time_snapshot(hours, minute, second)
 
         if not NOTEPAD_MODE:
             saved_note = large_askstring("Save your note", "Write your note:")
@@ -708,8 +770,7 @@ def center_window(window):
 
 def on_closing():
     if not pomodoro_mode_activate:
-        with open(TIME_CSV_PATH, mode='a') as file:
-            file.write(f"{hours},{minute},{second}\n")
+        write_time_snapshot(hours, minute, second)
     root.destroy()
 # ---------------------------- UI SETUP ------------------------------- #
 root = Tk()
