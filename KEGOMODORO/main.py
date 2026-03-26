@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import csv
 import tkinter.messagebox
@@ -21,6 +22,45 @@ from keyboard import is_pressed
 from PIL import Image, ImageTk
 from pathlib import Path
 # ---------------------------- CONSTANTS AND SOME VARIABLES ------------------------------- #
+def get_resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+def get_documents_dir():
+    """Resolve the user's Documents folder on Windows with a safe fallback."""
+    if os.name == "nt":
+        try:
+            from ctypes import create_unicode_buffer, windll
+
+            CSIDL_PERSONAL = 5
+            SHGFP_TYPE_CURRENT = 0
+            buffer = create_unicode_buffer(260)
+            if windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buffer) == 0:
+                return Path(buffer.value)
+        except Exception:
+            pass
+    return Path.home() / "Documents"
+
+def get_persistent_root():
+    """Choose a user-accessible folder for files that should survive updates."""
+    if getattr(sys, 'frozen', False):
+        base_path = get_documents_dir() / "KEGOMODORO"
+    else:
+        base_path = Path(os.path.abspath("."))
+
+    base_path.mkdir(parents=True, exist_ok=True)
+    return base_path
+
+def get_persistent_path(relative_path):
+    """ Get path for persistent files (config, logs) """
+    return str(get_persistent_root() / relative_path)
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 BLACK = "#000000"
 WHITE = "#feffff"
@@ -46,26 +86,53 @@ USERNAME = "kegan"
 TOKEN = "afhus8hj2phfb29nn821r"
 GRAPH_ID = "graph1"
 
-DEPENDENCIES = Path("dependencies/")
-IMAGES = f"{DEPENDENCIES}/images"
-AUDIOS = f"{DEPENDENCIES}/audios"
-TEXTS = f"{DEPENDENCIES}/texts"
-CONFIGURATION = f"{TEXTS}/Configurations"
+DEPENDENCIES = Path(get_resource_path("dependencies/"))
+IMAGES = DEPENDENCIES / "images"
+AUDIOS = DEPENDENCIES / "audios"
+TEXTS = DEPENDENCIES / "texts"
+# CONFIGURATION = TEXTS / "Configurations" # Moved to persistent storage
 
-SAVE_FILE_NAME = f"{TEXTS}/KAÆ[Æß#.txt" # ! Change this to your desired file name
-FLOATING_WINDOW_CHECKER_PATH = f"{CONFIGURATION}/floating_window_checker.txt"
-TIME_CSV_PATH = f"{CONFIGURATION}/time.csv"
-CONFIGURATION_PATH = f"{CONFIGURATION}/configuration.csv"
+# Persistent configuration paths
+PERSISTENT_CONFIG = Path(get_persistent_path("config/"))
+PERSISTENT_CONFIG.mkdir(parents=True, exist_ok=True)
 
-NEW_WORK_SOUND_PATH = f"{AUDIOS}/new_work.mp3"
-WORK_SOUND_PATH = f"{AUDIOS}/work.mp3"
-BREAK_SOUND_PATH = f"{AUDIOS}/short_break.mp3"
-LONG_BREAK_SOUND_PATH = f"{AUDIOS}/long_break.mp3"
+DEFAULT_SAVE_FILE_NAME = PERSISTENT_CONFIG / "notes.txt"
+FLOATING_WINDOW_CHECKER_PATH = PERSISTENT_CONFIG / "floating_window_checker.txt"
+TIME_CSV_PATH = PERSISTENT_CONFIG / "time.csv"
+CONFIGURATION_PATH = PERSISTENT_CONFIG / "configuration.csv"
 
-APP_ICON_PATH = f"{IMAGES}/icon.ico" 
-FLOATING_IMAGE_PATH = f"{IMAGES}/behelit.png"
-LOGO_IMAGE_PATH = f"{IMAGES}/signature.png"
-MAIN_IMAGE_PATH = f"{IMAGES}/main_image.png"
+def parse_bool(value, default=False):
+    if value is None:
+        return default
+    return str(value).strip().lower() in ["true", "1", "yes", "correct", "t", "y"]
+
+def resolve_note_path(note_path_value):
+    note_path_value = str(note_path_value or "").strip()
+    if not note_path_value:
+        note_path = DEFAULT_SAVE_FILE_NAME
+    else:
+        note_path = Path(os.path.expandvars(os.path.expanduser(note_path_value)))
+        if not note_path.is_absolute():
+            note_path = get_persistent_root() / note_path
+
+    note_path.parent.mkdir(parents=True, exist_ok=True)
+    return note_path
+
+def write_configuration(work_min, short_break_min, long_break_min, notepad_mode, note_path):
+    with open(CONFIGURATION_PATH, "w", newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["WORK_MIN", "SHORT_BREAK_MIN", "LONG_BREAK_MIN", "NOTEPAD_MODE", "NOTE_PATH"])
+        writer.writerow([work_min, short_break_min, long_break_min, int(bool(notepad_mode)), str(note_path)])
+
+NEW_WORK_SOUND_PATH = str(AUDIOS / "new_work.mp3")
+WORK_SOUND_PATH = str(AUDIOS / "work.mp3")
+BREAK_SOUND_PATH = str(AUDIOS / "short_break.mp3")
+LONG_BREAK_SOUND_PATH = str(AUDIOS / "long_break.mp3")
+
+APP_ICON_PATH = str(IMAGES / "icon.ico") 
+FLOATING_IMAGE_PATH = str(IMAGES / "behelit.png")
+LOGO_IMAGE_PATH = str(IMAGES / "signature.png")
+MAIN_IMAGE_PATH = str(IMAGES / "main_image.png")
 
 # Load to audio file
 pygame.mixer.init()
@@ -93,31 +160,34 @@ try:
 except:
     with open(TIME_CSV_PATH, "w") as file:
         file.write("\nhours,minute,second\n0,0,0\n")
-        
-try:
-    with open(CONFIGURATION_PATH, "r") as file:
-        file.read()
-except:
-    with open(CONFIGURATION_PATH, "w", newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["WORK_MIN", "SHORT_BREAK_MIN", "LONG_BREAK_MIN", "NOTEPAD_MODE"])
-        writer.writerow([25, 5, 20, FALSE])
+
+WORK_MIN = 25
+SHORT_BREAK_MIN = 5
+LONG_BREAK_MIN = 20
+NOTEPAD_MODE = False
+SAVE_FILE_NAME = resolve_note_path(DEFAULT_SAVE_FILE_NAME)
+
 # ----------------------------- TIMER CONFIGS ------------------------------- #
 try:
     with open(CONFIGURATION_PATH, "r", newline='') as file:
         reader = csv.DictReader(file)
-        config = next(reader) 
-        WORK_MIN = int(config["WORK_MIN"])
-        SHORT_BREAK_MIN = int(config["SHORT_BREAK_MIN"])
-        LONG_BREAK_MIN = int(config["LONG_BREAK_MIN"])
-        NOTEPAD_MODE = int(config["NOTEPAD_MODE"].lower() in ["true", "1", "yes", "correct"])
+        config = next(reader, {})
+
+    WORK_MIN = int(config.get("WORK_MIN", WORK_MIN))
+    SHORT_BREAK_MIN = int(config.get("SHORT_BREAK_MIN", SHORT_BREAK_MIN))
+    LONG_BREAK_MIN = int(config.get("LONG_BREAK_MIN", LONG_BREAK_MIN))
+    NOTEPAD_MODE = parse_bool(config.get("NOTEPAD_MODE"), NOTEPAD_MODE)
+    SAVE_FILE_NAME = resolve_note_path(config.get("NOTE_PATH", DEFAULT_SAVE_FILE_NAME))
 except Exception as e:
     # Fallback to defaults if reading fails
     WORK_MIN = 25
     SHORT_BREAK_MIN = 5
     LONG_BREAK_MIN = 20
     NOTEPAD_MODE = False
+    SAVE_FILE_NAME = resolve_note_path(DEFAULT_SAVE_FILE_NAME)
     print(f"Could not load configuration, using defaults: {e}")
+finally:
+    write_configuration(WORK_MIN, SHORT_BREAK_MIN, LONG_BREAK_MIN, NOTEPAD_MODE, SAVE_FILE_NAME)
 
 reps = 1
 resume = 0
@@ -494,13 +564,42 @@ def pause_pomodoro():
     floating_timer_label.config(text=f"{WORK_MIN:02d}:00")
     pause_button.config(text=f"Resume")
 
+def get_note_file_path():
+    note_file_path = Path(SAVE_FILE_NAME).resolve()
+    note_file_path.parent.mkdir(parents=True, exist_ok=True)
+    note_file_path.touch(exist_ok=True)
+    return note_file_path
+
+def build_saved_time_text():
+    if show_hours:
+        return f"{hours:02d}:{minute:02d}:{second:02d}"
+    return f"{minute:02d}:{second:02d}"
+
+def append_saved_entry(saved_note=""):
+    global note_writer_first_gap
+    note_file_path = get_note_file_path()
+    if note_writer_first_gap == 0:
+        note_writer_first = "\n"
+    else:
+        note_writer_first = "\n\n"
+    note_writer_first_gap = None
+
+    with open(note_file_path, 'a', encoding='utf-8') as file:
+        file.write(f"{note_writer_first}{dt.datetime.now().strftime('%d/%m/%Y')}\n{build_saved_time_text()}")
+        if saved_note:
+            file.write(f" {saved_note}")
+        if NOTEPAD_MODE:
+            file.write("\n")
+
+    return note_file_path
+
 # To see save data in note editor
 def open_in_notepad(filepath: str = SAVE_FILE_NAME):
-    relative_path = os.path.relpath(filepath)
-    subprocess.Popen(['notepad.exe', relative_path])
+    absolute_path = str(Path(filepath).resolve())
+    subprocess.Popen(['notepad.exe', absolute_path])
 
 def save_data():
-    global hours, minute, second, crono_mode_activate, show_hours, saved_data, crono_reset, paused, note_writer_first_gap
+    global hours, minute, second, crono_mode_activate, show_hours, saved_data, crono_reset, paused
     saved_note = ""
     if not paused:
         pause_timer()
@@ -509,42 +608,18 @@ def save_data():
         with open(TIME_CSV_PATH, mode='a') as file:
             file.write(f"{hours},{minute},{second}\n")
 
-        if show_hours:
-            if not NOTEPAD_MODE:
-                print(f"{NOTEPAD_MODE}")
-                saved_note = large_askstring("Save your note", "Write your note:")
-                if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
-                    pass
-                else: 
-                    showinfo("Your note:", '{}'.format(saved_note))
-        else:
-            if not NOTEPAD_MODE:
-                print(f"{NOTEPAD_MODE}")
-                saved_note = large_askstring("Save your note", "Write your note:")
-                if saved_note == "pass" or saved_note == "" or saved_note=="None" or saved_note == None:
-                    pass
-                else: 
-                    showinfo("Your note:", '{}'.format(saved_note))
-        try:
-            if note_writer_first_gap == 0:
-                note_writer_first = "\n"
+        if not NOTEPAD_MODE:
+            saved_note = large_askstring("Save your note", "Write your note:")
+            if saved_note not in ["pass", "", "None", None]:
+                showinfo("Your note:", '{}'.format(saved_note))
             else:
-                note_writer_first = "\n\n"
-            note_writer_first_gap = None
-            with open(SAVE_FILE_NAME, 'a', encoding='utf-8') as file:
-                if not show_hours:
-                    file.write(
-                        f"{note_writer_first}{dt.datetime.now().strftime('%d/%m/%Y')}\n{minute:02d}:{second:02d}")
-                    if saved_note:
-                        file.write(f" {saved_note}")
-                else: 
-                    file.write(
-                        f"{note_writer_first}{dt.datetime.now().strftime('%d/%m/%Y')}\n{hours:02d}:{minute:02d}:{second:02d}")
-                    if saved_note:
-                        file.write(f" {saved_note}")
+                saved_note = ""
+
+        try:
+            note_file_path = append_saved_entry(saved_note)
             time.sleep(0.03)
-            open_in_notepad(SAVE_FILE_NAME)
-        except e:
+            open_in_notepad(note_file_path)
+        except Exception as e:
             print(e)
     else:
         tkinter.messagebox.showerror("Error", "You need to be in stopwatch mode to use save button.")
