@@ -1,140 +1,161 @@
-# KEGOMODORO – Customizable Pomodoro & Stopwatch Timer ⏳
+# KEGOMODORO
 
-Welcome to **KEGOMODORO**! A completely open-source Pomodoro and Stopwatch timer designed to improve your time management and make working more fun. Whether you're studying, working, or just need a reliable timer, KEGOMODORO is here to keep you on track. Best of all, it's highly customizable, so you can make it fit your exact needs!
+KEGOMODORO is a desktop Pomodoro and Stopwatch app built with Python and Tkinter. The current version focuses on a simple local workflow: track time, save notes, keep a floating mini-timer on screen, and optionally sync worked hours to Pixela.
 
-**TOMATO AND BERSERK THEME!**
-![image](https://github.com/user-attachments/assets/ee38a43d-438e-4d9c-8320-29097d6b5b5f)
+The active application source lives in [`KEGOMODORO/main.py`](KEGOMODORO/main.py). This repository root contains project docs; the runnable app and packaged builds are inside the [`KEGOMODORO/`](KEGOMODORO) folder.
 
+## Current Features
 
+- Pomodoro mode and Stopwatch mode in one desktop app.
+- Floating mini-window timer that can stay visible while you work.
+- Journal saving from Stopwatch mode.
+- Same-day note merging: repeated saves on the same date update the time line and append new notes under the same day instead of creating duplicate headers.
+- Configurable note workflow through `configuration.csv`.
+- Optional Notepad-based workflow with a custom note file path.
+- Optional Pixela sync loaded from `.env` instead of hardcoded credentials.
+- Persistent user data for packaged builds under the user's Documents folder.
 
+## Repository Layout
 
-### **Behelit Feature (from *Berserk*)**
-- For fans of *Berserk*, a Behelit feature has been added to the cronometer. When activated, it serves as a special timer with a visual reference to the Behelit, adding a touch of *Berserk* magic to your experience!
+```text
+kegomodoro/
+|- README.md
+|- KEGOMODORO/
+|  |- main.py
+|  |- main.spec
+|  |- .env.example
+|  |- dependencies/
+|  `- dist_*/ build_* outputs
+```
 
-## 💡 Key Features
+## Running From Source
 
-- **Pomodoro & Stopwatch Mode**: Toggle between Pomodoro and Stopwatch timers easily.
-- **Always on Top**: Keep your timer visible with the "Always on Top" feature.
-- **Quick Notes & Session Logging**: Record your notes and working hours in a jiffy.
-- **Work Hours Graph**: Visualize your productivity with a graph of your work hours 📊.
-- **Behelit Mode (Berserk Theme)**: For fans of Berserk, a Behelit-inspired timer with a dark twist!
-- **Lightweight & Simple**: Developed in Python with no unnecessary dependencies.
+1. Clone the repository and open a terminal in the repo root:
 
-## 🎨 Custom Themes & Personalization
+```bash
+git clone git@github.com:Kagankakao/KEGOMODORO.git
+cd KEGOMODORO/KEGOMODORO
+```
 
-KEGOMODORO is all about **customization**. Easily create your own themes, change colors, and adjust the look of your timer. The goal is to make time management not only effective but visually appealing too.
+2. Install the runtime dependencies:
 
-The image below shows just a few of the many customizable options you can apply.
+```bash
+pip install pillow requests pygame pyautogui keyboard
+```
 
-## 🐍 Built with Python
+Notes:
+- `tkinter` ships with most standard Windows Python installs.
+- The app is Windows-oriented and uses Notepad and Windows Documents paths in packaged mode.
 
-KEGOMODORO is developed in **Python**, making it easy to modify, extend, and understand. Whether you’re a beginner or an expert, the code is simple to follow, and the project is perfect for learning how to build your own timers.
+3. Start the app:
 
-## 💻 Fully Open Source
+```bash
+python main.py
+```
 
-This project is completely open-source! You can fork it, contribute, and make improvements or adapt it for your own use. Let’s make time management even better, together!
+## Packaged Build Behavior
 
-![368684829-96e1a41d-dc5d-40f3-a429-2cf6b6a2a41d](https://github.com/user-attachments/assets/f0dba28e-92f4-4bfa-80c6-5e5dbfab07fa)
-- **Take Notes**: Take notes and save your work **automatically**.
+When you run the packaged `.exe`, KEGOMODORO stores persistent user files in your Documents folder:
 
-![image](https://github.com/user-attachments/assets/5793db64-fa98-4971-a193-4ffd78c406c2)
-- **Example**: **Automatically** saved notes:
+```text
+Documents/KEGOMODORO/config/
+```
 
-![image](https://github.com/user-attachments/assets/0b669bc0-d472-4dcd-a5e7-9979df36786a)
-- **Pixela Integration**: Uploads time data to Pixela for **visualization** and **tracking**.
-![image](https://github.com/user-attachments/assets/6eb448b2-4fb5-4b39-9b36-377fc235a731)
-**Example** of mine: https://pixe.la/v1/users/kegan/graphs/graph1.html
+Typical files in that folder:
+- `configuration.csv`
+- `time.csv`
+- `notes.txt`
+- `floating_window_checker.txt`
 
+This means your data survives app updates and does not need to live beside the `.exe`.
 
-## Getting Started
+## Notes and Save Flow
 
-### Prerequisites
+The `Save` button is intended for Stopwatch mode.
 
-- Python 3.x installed on your system.
-- Required Python libraries:
-  - `tkinter`
-  - `Pillow`
-  - `requests`
-  - `datetime`
-  - `csv`
+Current save behavior:
+- The current stopwatch time is written to `time.csv` as a single clean snapshot.
+- Notes are stored in a text file, not scattered across many duplicate daily entries.
+- If you save multiple notes on the same day, KEGOMODORO keeps one date section and appends later notes underneath it.
+- Older journal files that used `dd/mm/yyyy` date headers are still recognized and merged correctly.
+- After saving, the note file opens in Notepad.
 
-### Installation
+## configuration.csv
 
-1. **Clone the Repository**
+The app writes and maintains this header automatically:
 
-   ```bash
-   git clone https://github.com/Kagankakao/KEGOMODORO.git
-   ```
+```csv
+WORK_MIN,SHORT_BREAK_MIN,LONG_BREAK_MIN,NOTEPAD_MODE,NOTE_PATH
+```
 
-2. **Navigate to the Project Directory**
+What each field does:
+- `WORK_MIN`: Pomodoro work session length in minutes.
+- `SHORT_BREAK_MIN`: Short break length in minutes.
+- `LONG_BREAK_MIN`: Long break length in minutes.
+- `NOTEPAD_MODE`: `1` to skip the in-app note prompt, `0` to keep it.
+- `NOTE_PATH`: Absolute or relative path to the note file you want to use.
 
-   ```bash
-   cd KEGOMODORO
-   ```
+Example:
 
-3. **Install Dependencies**
+```csv
+WORK_MIN,SHORT_BREAK_MIN,LONG_BREAK_MIN,NOTEPAD_MODE,NOTE_PATH
+25,5,20,1,C:\Users\YourName\Documents\MyJournal\kegomodoro_notes.txt
+```
 
-   If you don't have the required libraries, you can install them using pip:
+If `NOTE_PATH` is empty, the app falls back to the default note file in the config folder.
 
-   ```bash
-   pip install pillow requests
-   ```
+## Pixela Setup
 
-### Usage
+Pixela is optional. If the required environment variables are missing, the app simply skips Pixela sync.
 
-1. **Run the Application**
+1. From the app folder, copy the template:
 
-   Execute the following command to start the application:
+```bash
+cp .env.example .env
+```
 
-   ```bash
-   python main.py
-   ```
+2. Fill in your values in `.env`:
 
-2. **Using the Timer**
+```env
+PIXELA_ENDPOINT=https://pixe.la/v1/users
+PIXELA_USERNAME=your_pixela_username
+PIXELA_TOKEN=your_pixela_token
+PIXELA_GRAPH_ID=your_graph_id
+```
 
-   - **Start**: Click the "Start" button to begin the timer.
-   - **Pause**: Click the "Pause" button to pause the timer. Click again to resume.
-   - **Reset**: Click the "Reset" button to reset the timer to zero.
-   - **Save**: Click the "Save" button to save the current time and notes to a CSV file.
+The app looks for `.env` in these locations:
+- next to the app (`KEGOMODORO/.env` in source mode, or next to the `.exe` in packaged mode)
+- `Documents/KEGOMODORO/.env`
 
-3. **Floating Window**
+## Building
 
-   - Use the "SmallWindow" checkbox to toggle the floating timer window. This window will stay on top of other applications.
+The project includes a PyInstaller spec file at [`KEGOMODORO/main.spec`](KEGOMODORO/main.spec).
 
-### Pixela Integration
+From the app folder:
 
-To use Pixela, follow these steps:
+```bash
+python -m PyInstaller --noconfirm main.spec
+```
 
-1. **Create a Pixela Account**
+That will build a Windows executable using the bundled `dependencies/` assets.
 
-   Sign up at [Pixela](https://pixe.la/) and create a new graph to track your time.
+## Troubleshooting
 
-2. **Configure Pixela in Your Code**
+### Save button does nothing useful
+- Make sure you are in Stopwatch mode. The save flow is tied to Stopwatch logging.
 
-   Open `main.py` and locate the `connect_to_pixela` function. Replace the placeholder values with your Pixela API token, user ID, and graph details.
+### Pixela is not updating
+- Check that your `.env` values are correct.
+- Confirm that `PIXELA_USERNAME`, `PIXELA_TOKEN`, and `PIXELA_GRAPH_ID` are all set.
 
-3. **Save Data to Pixela**
+### I want to open my own journal file
+- Set `NOTE_PATH` in `configuration.csv` to your existing text file.
+- Set `NOTEPAD_MODE=1` if you want a fully Notepad-first flow.
 
-   When you click the "Save" button, the application will attempt to upload your time data to Pixela. Ensure your Pixela configuration is correct to enable this feature.
+## Contributing
 
-### Configuration
+If you want to contribute, please open an issue or send a pull request. The main implementation is currently concentrated in [`KEGOMODORO/main.py`](KEGOMODORO/main.py), so most behavior changes will start there.
 
-You can customize the timer settings by adjusting the following variables in `main.py`:
+## License
 
-- `SHORT_BREAK_MIN`: Duration of the short break in minutes.
-- `LONG_BREAK_MIN`: Duration of the long break in minutes.
-- `SAVE_FILE_NAME`: Name of the CSV file where your time data is saved.
-- `MINUTE_X`, `MINUTE_Y`, `HOURS_X`, `HOURS_Y`: Coordinates for the floating window timer.
-
-### Troubleshooting
-    
-- **Pixela Connection Issues**: Ensure you have a valid Pixela account and that your API token and graph details are correct.
-- **Missing Libraries**: Make sure all required libraries are installed.
-
-### Contributing
-
-If you'd like to contribute to this project, please fork the repository, create a branch for your changes, and submit a pull request. For detailed contributing guidelines, please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file.
-
-### License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See [`LICENSE`](LICENSE) for details.
